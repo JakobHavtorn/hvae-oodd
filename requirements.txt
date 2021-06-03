@@ -1,0 +1,12 @@
+black
+matplotlib
+numpy
+pandas
+pytest
+pytest-cov
+pytest-html
+pyyaml
+rich
+scikit-learn
+seaborn
+tqdm
