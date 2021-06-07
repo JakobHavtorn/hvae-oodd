@@ -6,7 +6,7 @@ arXiv paper link: https://arxiv.org/abs/2102.08248.
 
 Source code builds upon https://github.com/vlievin/biva-pytorch.
 
-![Reconstructions of FashionMNIST and MNIST examples by latent variable trained on FashionMNIST]([http://url/to/img.png](https://github.com/JakobHavtorn/hvae-oodd/blob/main/assets/reconstructions.png))
+![Reconstructions of FashionMNIST and MNIST examples by latent variable trained on FashionMNIST](https://github.com/JakobHavtorn/hvae-oodd/blob/main/assets/reconstructions.png)
 
 
 ## Install
