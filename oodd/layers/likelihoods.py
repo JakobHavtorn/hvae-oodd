@@ -306,8 +306,6 @@ class DiscretizedLogisticMixLikelihoodConv2d(LikelihoodModule):
     Mean and mode are not implemented for now.
 
     Output channels for now is fixed to 3 and n_bins to 256.
-
-    Explanation: https://github.com/Rayhane-mamah/Tacotron-2/issues/155#issuecomment-413364857
     """
 
     def __init__(self, input_shape, out_shape, nr_mix=10, kernel_size=1, activation="LeakyReLU", weightnorm=True):
@@ -365,8 +363,8 @@ class DiscretizedLogisticMixLikelihoodConv2d(LikelihoodModule):
         data = LikelihoodData(
             likelihood=likelihood,
             distribution=None,
-            mean=samples,  # TODO We need the mean and mode here
-            mode=samples,  # TODO We need the mean and mode here
+            mean=samples,
+            mode=samples,
             variance=None,
             samples=samples,
             distribution_kwargs=distr_kwargs,
@@ -387,8 +385,6 @@ class DiscretizedLogisticMixLikelihoodDense(LikelihoodModule):
     Mean and mode are not implemented for now.
 
     Output channels for now is fixed to 3 and n_bins to 256.
-
-    Explanation: https://github.com/Rayhane-mamah/Tacotron-2/issues/155#issuecomment-413364857
     """
 
     def __init__(self, input_shape, out_shape, nr_mix=10, kernel_size=1, activation="LeakyReLU", weightnorm=True):
@@ -600,17 +596,6 @@ def log_discretized_mix_logistic(x, l):
 
     Code taken from pytorch adaptation of original PixelCNN++ tf implementation
     https://github.com/pclucas14/pixel-cnn-pp
-
-    The mean of a discretized mixture of logistics
-        ll = sum( pi_i * (1/(1+exp(-(x+0.5-mu_i)/s_i)) - 1/(1+exp(-(x-0.5-mu_i)/s_i)))
-        diff(1/(1+exp(-(x+0.5-mu)/s)) - 1/(1+exp(-(x-0.5-mu)/s)), mu)
-        diff(ll, mu_i) = sum( pi_i * (exp((mu_i - x + 0.5) / s_i) / (s_i * (exp((mu_i - x + 0.5) / s_i) + 1)**2) -
-                                    exp((mu_i - x - 0.5) / s_i) / (s_i * (exp((mu_i - x - 0.5) / s_i) + 1)**2))
-        diff(1/(1+exp(-(x+0.5-mu)/s)) - 1/(1+exp(-(x-0.5-mu)/s)), s)
-        diff(ll, s_i) = sum( pi_ * ((mu - x - 0.5) * exp((mu - x - 0.5) / s) / (s**2 * (exp((mu - x - 0.5) / s) + 1)**2) -
-                                    (mu - x + 0.5) * exp((mu - x + 0.5) / s) / (s**2 * (exp((mu - x + 0.5) / s) + 1)**2)))
-        solve( exp((mu - x + 0.5) / s) / (s * (exp((mu - x + 0.5) / s) + 1)**2) - exp((mu - x - 0.5) / s) / (s * (exp((mu - x - 0.5) / s) + 1)**2) = 0, mu)
-        mu = s * log(-exp(x/s) + 2iπn), i in Z
 
     Args:
         x (torch.Tensor): Original input image (the true distribution) as (B, C, H, W)
