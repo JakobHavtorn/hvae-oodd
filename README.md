@@ -155,3 +155,24 @@ The `batch_size` can be tuned to avoid out-of-memory errors.
 
 2. Compute OODD results
     > `python scripts/ood-llr-results.py`
+
+
+## Citation
+
+```
+@InProceedings{pmlr-v139-havtorn21a,
+  title = {Hierarchical VAEs Know What They Don’t Know},
+  author = {Havtorn, Jakob D. Drachmann and Frellsen, Jes and Hauberg, Soren and Maal{\o}e, Lars},
+  booktitle = {Proceedings of the 38th International Conference on Machine Learning},
+  pages = {4117--4128},
+  year = {2021},
+  editor = {Meila, Marina and Zhang, Tong},
+  volume = {139},
+  series = {Proceedings of Machine Learning Research},
+  month = {18--24 Jul},
+  publisher = {PMLR},
+  pdf = {http://proceedings.mlr.press/v139/havtorn21a/havtorn21a.pdf},
+  url = {http://proceedings.mlr.press/v139/havtorn21a.html},
+  abstract = {Deep generative models have been demonstrated as state-of-the-art density estimators. Yet, recent work has found that they often assign a higher likelihood to data from outside the training distribution. This seemingly paradoxical behavior has caused concerns over the quality of the attained density estimates. In the context of hierarchical variational autoencoders, we provide evidence to explain this behavior by out-of-distribution data having in-distribution low-level features. We argue that this is both expected and desirable behavior. With this insight in hand, we develop a fast, scalable and fully unsupervised likelihood-ratio score for OOD detection that requires data to be in-distribution across all feature-levels. We benchmark the method on a vast set of data and model combinations and achieve state-of-the-art results on out-of-distribution detection.}
+}
+```
