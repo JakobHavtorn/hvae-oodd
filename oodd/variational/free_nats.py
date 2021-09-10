@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import torch
 
@@ -15,8 +17,9 @@ class FreeNats:
     [1] https://arxiv.org/pdf/1606.04934
     """
 
-    def __init__(self, min_kl: float):
+    def __init__(self, min_kl: float, shared_dims: int = None):
         self.min_kl = min_kl
+        self.shared_dims = (shared_dims,) if isinstance(shared_dims, int) else shared_dims
 
     def __call__(self, kl: torch.Tensor) -> torch.Tensor:
         """
@@ -25,12 +28,15 @@ class FreeNats:
         :param kl: KL of shape [batch size, *dimensions]
         :return:  free nats KL of shape [batch size, *dimensions]
         """
-        if self.min_kl is None:
+        if self.min_kl is None or self.min_kl == 0:
             return kl
 
-        # equally divide free nats budget over the dimensions
-        dimensions = np.prod(kl.shape[1:])
-        min_kl_per_dim = self.min_kl / dimensions
+        # equally divide free nats budget over the elements in shared_dims
+        if self.shared_dims is not None:
+            n_elements = math.prod([kl.shape[d] for d in self.shared_dims])
+            min_kl_per_dim = self.min_kl / n_elements
+        else:
+            min_kl_per_dim = self.min_kl
 
         min_kl_per_dim = torch.tensor(min_kl_per_dim, dtype=kl.dtype, device=kl.device)
         freenats_kl = torch.maximum(kl, min_kl_per_dim)

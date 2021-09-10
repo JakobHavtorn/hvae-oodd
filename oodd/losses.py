@@ -48,7 +48,7 @@ class ELBO(nn.Module):
             free_nats = [free_nats] * len(kl_divergences)
 
         # Apply FreeNats to get KL divergence loss
-        kl_losses = [FreeNats(fn)(kl) for fn, kl in zip(free_nats, kl_divergences)]
+        kl_losses = [FreeNats(fn, 1)(kl) for fn, kl in zip(free_nats, kl_divergences)]
         kl_loss = sum([reduce_to_batch(kl) for kl in kl_losses])
         kl_divergence = sum([reduce_to_batch(kl) for kl in kl_divergences])
 
