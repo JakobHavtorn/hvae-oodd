@@ -16,7 +16,7 @@ conda deactivate
 conda env remove -n oodd -y
 conda create -y -n oodd python==3.8.10
 conda activate oodd
-conda install -y -c pytorch python pytorch torchvision cudatoolkit=10.2
+conda install -y -c pytorch python pytorch==1.8.1 torchvision cudatoolkit=10.2
 pip install -r requirements.txt
 pip install --editable .
 ```
