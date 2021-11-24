@@ -37,7 +37,7 @@ parser.add_argument("--free_nats", type=float, default=0, help="nats considered 
 parser.add_argument("--n_eval_samples", type=int, default=32, help="samples from prior for quality inspection")
 parser.add_argument("--seed", type=int, default=1, metavar="S", help="random seed")
 parser.add_argument("--test_every", type=int, default=1, help="epochs between evaluations")
-parser.add_argument("--save_dir", type=str, default="./models", help="directory for saving models")
+parser.add_argument("--save_dir", type=str, default="/scratch/s193223/oodd/models", help="directory for saving models")
 parser = oodd.datasets.DataModule.get_argparser(parents=[parser])
 
 args, unknown_args = parser.parse_known_args()

@@ -25,14 +25,14 @@ LOGGER = logging.getLogger()
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="./models/FashionMNIST-21-01-15-15-35-21.236574", help="model")
+parser.add_argument("--model_dir", type=str, default="/scratch/s193223/oodd/models/FashionMNIST-21-01-15-15-35-21.236574", help="model")
 parser.add_argument("--iw_samples_elbo", type=int, default=1, help="importances samples for regular ELBO")
 parser.add_argument("--iw_samples_Lk", type=int, default=1, help="importances samples for L>k bound")
 parser.add_argument("--n_eval_examples", type=int, default=float("inf"), help="cap on the number of examples to use")
 parser.add_argument("--n_latents_skip", type=int, default=1, help="the value of k in the paper")
 parser.add_argument("--batch_size", type=int, default=500, help="batch size for evaluation")
 parser.add_argument("--device", type=str, default="auto", help="device to evaluate on")
-parser.add_argument("--save_dir", type=str, default="./results", help="directory to store scores in")
+parser.add_argument("--save_dir", type=str, default="/scratch/s193223/oodd/results", help="directory to store scores in")
 
 args = parser.parse_args()
 rich.print(vars(args))
