@@ -153,18 +153,46 @@ def update_key(sample_stats, x, k):
 
 def get_stage_stats(stage_data):
     return {
-        "kl": reduce_to_batch(stage_data.loss.kl_elementwise, batch_dim=0, reduction=torch.sum).detach(),
-        "p_var": reduce_to_batch(stage_data.p.variance, batch_dim=0, reduction=torch.mean).detach(),
-        "q_var": reduce_to_batch(stage_data.q.variance, batch_dim=0, reduction=torch.mean).detach(),
-        "p_mean_sq": reduce_to_batch(torch.pow(stage_data.p.mean, 2), batch_dim=0, reduction=torch.mean).detach(),
-        "q_mean_sq": reduce_to_batch(torch.pow(stage_data.q.mean, 2), batch_dim=0, reduction=torch.mean).detach(),
-        "mean_diff_sq": reduce_to_batch(torch.pow(stage_data.q.mean - stage_data.p.mean, 2), batch_dim=0, reduction=torch.mean).detach(),
-        "var_diff_sq": reduce_to_batch(torch.pow(stage_data.q.variance - stage_data.p.variance, 2), batch_dim=0, reduction=torch.mean).detach(),
+        "kl": (
+            reduce_to_batch(stage_data.loss.kl_elementwise, batch_dim=0, reduction=torch.sum).detach()
+            if stage_data.loss.kl_elementwise is not None
+            else None
+        ),
+        "p_var": (
+            reduce_to_batch(stage_data.p.variance, batch_dim=0, reduction=torch.mean).detach()
+            if stage_data.p.variance is not None
+            else None
+        ),
+        "q_var": (
+            reduce_to_batch(stage_data.q.variance, batch_dim=0, reduction=torch.mean).detach()
+            if stage_data.q.variance is not None
+            else None
+        ),
+        "p_mean_sq": (
+            reduce_to_batch(torch.pow(stage_data.p.mean, 2), batch_dim=0, reduction=torch.mean).detach()
+            if stage_data.p.mean is not None
+            else None
+        ),
+        "q_mean_sq": (
+            reduce_to_batch(torch.pow(stage_data.q.mean, 2), batch_dim=0, reduction=torch.mean).detach()
+            if stage_data.q.mean is not None
+            else None
+        ),
+        "mean_diff_sq": (
+            reduce_to_batch(torch.pow(stage_data.q.mean - stage_data.p.mean, 2), batch_dim=0, reduction=torch.mean).detach()
+            if  (stage_data.q.mean is not None) and (stage_data.p.mean is not None)
+            else None
+        ),
+        "var_diff_sq": (
+            reduce_to_batch(torch.pow(stage_data.q.variance - stage_data.p.variance, 2), batch_dim=0, reduction=torch.mean).detach()
+            if (stage_data.q.variance is not None) and (stage_data.p.variance is not None)
+            else None
+        ),
     }
 
 def update_sample_stats(sample_stats, stage_datas):
     stages_stats = [get_stage_stats(stage_data) for stage_data in stage_datas]
-    stats = {k: [dic[k] for dic in stages_stats] for k in stages_stats[0]}
+    stats = {k: [dic[k] for dic in stages_stats if dic[k] is not None] for k in stages_stats[0]}
     for k, v in stats.items():
         update_key(sample_stats, v, k)
 
