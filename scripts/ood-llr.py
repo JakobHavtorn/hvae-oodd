@@ -269,6 +269,8 @@ with torch.no_grad():
             sample_elbo = oodd.utils.log_sum_exp(sample_elbos, axis=0)
             sample_elbo_k = oodd.utils.log_sum_exp(sample_elbos_k, axis=0)
 
+            sample_likelihoods = torch.stack(sample_likelihoods, axis=0)
+            sample_likelihoods_k = torch.stack(sample_likelihoods_k, axis=0)
             sample_likelihoods = oodd.utils.log_sum_exp(sample_likelihoods, axis=0)
             sample_likelihoods_k = oodd.utils.log_sum_exp(sample_likelihoods_k, axis=0)
 
