@@ -19,7 +19,7 @@ import oodd.evaluators
 import oodd.models
 import oodd.losses
 import oodd.utils
-
+from oodd.utils import reduce_to_batch
 
 LOGGER = logging.getLogger()
 
@@ -140,6 +140,42 @@ dataloaders |= {(k + " train", v) for k, v in datamodule.test_loaders.items()}
 scores = defaultdict(list)
 elbos = defaultdict(list)
 elbos_k = defaultdict(list)
+likelihoods = defaultdict(list)
+likelihoods_k = defaultdict(list)
+
+stats = defaultdict(defaultdict(list))
+stats_k = defaultdict(defaultdict(list))
+
+def update_key(sample_stats, x, k):
+    sample_stats[f"{k}_sum"].append(sum(x))
+    for i, t in enumerate(x):
+        sample_stats[f'{k}_{i}'].append(t)
+
+def get_stage_stats(stage_data):
+    return {
+        "kl": reduce_to_batch(stage_data.loss.kl_elementwise, batch_dim=0, reduction=torch.sum).detach(),
+        "p_var": reduce_to_batch(stage_data.p.variance, batch_dim=0, reduction=torch.mean).detach(),
+        "q_var": reduce_to_batch(stage_data.q.variance, batch_dim=0, reduction=torch.mean).detach(),
+        "p_mean_sq": reduce_to_batch(torch.pow(stage_data.p.mean, 2), batch_dim=0, reduction=torch.mean).detach(),
+        "q_mean_sq": reduce_to_batch(torch.pow(stage_data.q.mean, 2), batch_dim=0, reduction=torch.mean).detach(),
+        "mean_diff_sq": reduce_to_batch(torch.pow(stage_data.q.mean - stage_data.p.mean, 2), batch_dim=0, reduction=torch.mean).detach(),
+        "var_diff_sq": reduce_to_batch(torch.pow(stage_data.q.variance - stage_data.p.variance, 2), batch_dim=0, reduction=torch.mean).detach(),
+    }
+
+def update_sample_stats(sample_stats, stage_datas):
+    stages_stats = [get_stage_stats(stage_data) for stage_data in stage_datas]
+    stats = {k: [dic[k] for dic in stages_stats] for k in stages_stats[0]}
+    for k, v in stats.items():
+        update_key(sample_stats, v, k)
+
+def stack_and_mean(stats):
+    grouped_stats = {}
+    stats = {k: [dic[k] for dic in stats] for k in stats[0]}
+    for k, v in stats.items():
+        x = torch.stack(v, dim=0)
+        grouped_stats[k] = torch.mean(x, dim=0)
+    return grouped_stats
+
 with torch.no_grad():
     for dataset, dataloader in dataloaders:
         dataset = dataset.replace("Binarized", "").replace("Quantized", "").replace("Dequantized", "")
@@ -151,6 +187,8 @@ with torch.no_grad():
 
             n += x.shape[0]
             sample_elbos, sample_elbos_k = [], []
+            sample_likelihoods, sample_likelihoods_k = [], []
+            sample_stats, sample_stats_k = defaultdict(list), defaultdict(list)
 
             # Regular ELBO
             for i in tqdm(range(args.iw_samples_elbo), leave=False):
@@ -160,6 +198,9 @@ with torch.no_grad():
                     for stage_data in stage_datas
                     if stage_data.loss.kl_elementwise is not None
                 ]
+
+                update_sample_stats(sample_stats, stage_datas)
+
                 loss, elbo, likelihood, kl_divergences = criterion(
                     likelihood_data.likelihood,
                     kl_divergences,
@@ -170,6 +211,7 @@ with torch.no_grad():
                     batch_reduction=None,
                 )
                 sample_elbos.append(elbo.detach())
+                sample_likelihoods.append(likelihood.detach())
 
             # L>k bound
             for i in tqdm(range(args.iw_samples_Lk), leave=False):
@@ -188,7 +230,10 @@ with torch.no_grad():
                     sample_reduction=None,
                     batch_reduction=None,
                 )
+
+                update_sample_stats(sample_stats_k, stage_datas_k)
                 sample_elbos_k.append(elbo_k.detach())
+                sample_likelihoods_k.append(likelihood_k.detach())
 
             sample_elbos = torch.stack(sample_elbos, axis=0)
             sample_elbos_k = torch.stack(sample_elbos_k, axis=0)
@@ -196,11 +241,24 @@ with torch.no_grad():
             sample_elbo = oodd.utils.log_sum_exp(sample_elbos, axis=0)
             sample_elbo_k = oodd.utils.log_sum_exp(sample_elbos_k, axis=0)
 
+            sample_likelihoods = oodd.utils.log_sum_exp(sample_likelihoods, axis=0)
+            sample_likelihoods_k = oodd.utils.log_sum_exp(sample_likelihoods_k, axis=0)
+
+            sample_stats = stack_and_mean(sample_stats)
+            sample_stats_k = stack_and_mean(sample_stats_k)
+
             score = sample_elbo - sample_elbo_k
 
             scores[dataset].extend(score.tolist())
             elbos[dataset].extend(sample_elbo.tolist())
             elbos_k[dataset].extend(sample_elbo_k.tolist())
+            likelihoods[dataset].extend(likelihoods.tolist())
+            likelihoods_k[dataset].extend(likelihoods_k.tolist())
+
+            for k, v in sample_stats.items():
+                stats[dataset][k].extend(v.tolist())
+            for k, v in sample_stats_k.items():
+                stats_k[dataset][k].extend(v.tolist())
 
             if n > N_EQUAL_EXAMPLES_CAP:
                 LOGGER.warning(f"Skipping remaining iterations due to {N_EQUAL_EXAMPLES_CAP=}")
@@ -214,4 +272,9 @@ for dataset in sorted(scores.keys()):
 
 # save scores
 torch.save(scores, get_save_path(f"values-scores-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
-torch.save(scores, get_save_path(f"values-elbos_k-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
+torch.save(elbos, get_save_path(f"values-elbos-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
+torch.save(elbos_k, get_save_path(f"values-elbos_k-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
+torch.save(likelihoods, get_save_path(f"values-likelihoods-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
+torch.save(likelihoods_k, get_save_path(f"values-likelihoods_k-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
+torch.save(stats, get_save_path(f"values-stats-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
+torch.save(stats_k, get_save_path(f"values-stats_k-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
