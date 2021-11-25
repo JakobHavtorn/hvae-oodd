@@ -24,7 +24,7 @@ LOGGER = logging.getLogger()
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--source_dir", type=str, default="./results", help="directory from which to load scores")
+parser.add_argument("--source_dir", type=str, default="/scratch/s193223/oodd/results", help="directory from which to load scores")
 
 args = parser.parse_args()
 rich.print(vars(args))
