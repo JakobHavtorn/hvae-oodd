@@ -8,7 +8,7 @@ def reduce_batch(tensor, batch_dim=0, reduction=torch.sum):
 
     Given (D*, B, D*) returns (D*, D*)
     """
-    return reduction(tensor, axis=batch_dim)
+    return reduction(tensor, dim=batch_dim)
 
 
 def reduce_samples(tensor, batch_dim=0, sample_dim=0, n_samples=None, reduction=torch.sum):
@@ -74,8 +74,8 @@ def log_sum_exp(tensor, axis=-1, dim=None, sum_op=torch.mean):
     :return: LSE
     """
     axis = dim if dim is not None else axis
-    maximum, _ = torch.max(tensor, axis=axis, keepdim=False)
-    return torch.log(sum_op(torch.exp(tensor - maximum), axis=axis, keepdim=False) + 1e-8) + maximum
+    maximum, _ = torch.max(tensor, dim=axis, keepdim=False)
+    return torch.log(sum_op(torch.exp(tensor - maximum), dim=axis, keepdim=False) + 1e-8) + maximum
 
 
 def first_nonnegative(tensor, axis=0):
