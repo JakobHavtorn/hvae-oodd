@@ -263,14 +263,14 @@ with torch.no_grad():
                 sample_elbos_k.append(elbo_k.detach())
                 sample_likelihoods_k.append(likelihood_k.detach())
 
-            sample_elbos = torch.stack(sample_elbos, dim=0)
-            sample_elbos_k = torch.stack(sample_elbos_k, dim=0)
+            sample_elbos = torch.stack(sample_elbos, axis=0)
+            sample_elbos_k = torch.stack(sample_elbos_k, axis=0)
 
-            sample_elbo = oodd.utils.log_sum_exp(sample_elbos, dim=0)
-            sample_elbo_k = oodd.utils.log_sum_exp(sample_elbos_k, dim=0)
+            sample_elbo = oodd.utils.log_sum_exp(sample_elbos, axis=0)
+            sample_elbo_k = oodd.utils.log_sum_exp(sample_elbos_k, axis=0)
 
-            sample_likelihoods = oodd.utils.log_sum_exp(sample_likelihoods, dim=0)
-            sample_likelihoods_k = oodd.utils.log_sum_exp(sample_likelihoods_k, dim=0)
+            sample_likelihoods = oodd.utils.log_sum_exp(sample_likelihoods, axis=0)
+            sample_likelihoods_k = oodd.utils.log_sum_exp(sample_likelihoods_k, axis=0)
 
             sample_stats = stack_and_mean(sample_stats)
             sample_stats_k = stack_and_mean(sample_stats_k)
