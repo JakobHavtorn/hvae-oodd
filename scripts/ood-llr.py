@@ -282,8 +282,8 @@ with torch.no_grad():
             scores[dataset].extend(score.tolist())
             elbos[dataset].extend(sample_elbo.tolist())
             elbos_k[dataset].extend(sample_elbo_k.tolist())
-            likelihoods[dataset].extend(likelihoods.tolist())
-            likelihoods_k[dataset].extend(likelihoods_k.tolist())
+            likelihoods[dataset].extend(sample_likelihoods.tolist())
+            likelihoods_k[dataset].extend(sample_likelihoods_k.tolist())
 
             for k, v in sample_stats.items():
                 stats[dataset][k].extend(v.tolist())
