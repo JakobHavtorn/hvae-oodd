@@ -143,8 +143,8 @@ elbos_k = defaultdict(list)
 likelihoods = defaultdict(list)
 likelihoods_k = defaultdict(list)
 
-stats = defaultdict(defaultdict(list))
-stats_k = defaultdict(defaultdict(list))
+stats = defaultdict(lambda: defaultdict(list))
+stats_k = defaultdict(lambda: defaultdict(list))
 
 def update_key(sample_stats, x, k):
     sample_stats[f"{k}_sum"].append(sum(x))
