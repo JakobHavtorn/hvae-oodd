@@ -13,7 +13,7 @@ import torch
 import seaborn as sns
 import matplotlib.pyplot as plt
 import sklearn.metrics
-
+import pandas as pd
 import oodd.evaluators
 import oodd.models
 import oodd.losses
@@ -102,6 +102,7 @@ def write_text_file(filepath, string):
     with open(filepath, "w") as file_buffer:
         file_buffer.write(string)
 
+ALL_RESULTS = []
 
 def compute_results(score, score_name):
     results = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(defaultdict))))
@@ -139,7 +140,15 @@ def compute_results(score, score_name):
                         )
 
                         s += f"{test_dataset:20s} | k={k:1d} | iw_elbo={iw_elbo:<4d} | iw_elbo_k={iw_elbo_k:<4d} | AUROC={roc_auc:6.4f}, AUPRC={pr_auc:6.4f}, FPR80={fpr80:6.4f}\n"
-
+                        ALL_RESULTS.append({
+                            "dataset": test_dataset,
+                            "k": k,
+                            "iw_elbo": iw_elbo,
+                            "iw_elbo_k": iw_elbo_k,
+                            "AUROC": roc_auc,
+                            "AUPRC": pr_auc,
+                            "FPR80": fpr80,
+                        })
         print(s)
         f = f"results-{score_name}-{reference_dataset}.txt"
         write_text_file(get_save_path(f), s)
@@ -163,3 +172,5 @@ rich.print(
     "[bold magenta]================================================ L>k ================================================[/]"
 )
 results_elbo_k = compute_results(elbo_k, score_name="elbo_k")
+results_df = pd.DataFrame(ALL_RESULTS)
+results_df.to_csv("results.csv", index=None)
