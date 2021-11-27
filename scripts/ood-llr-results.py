@@ -78,7 +78,7 @@ def get_k(file_name):
 
 
 def load_data(files, negate_scores: bool = False):
-    data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(defaultdict))))
+    data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(defaultdict)))))
     for f in files:
         reference_dataset = get_dataset(f)
         stat = f.split("-")[1]
