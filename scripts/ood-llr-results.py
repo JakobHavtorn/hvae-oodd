@@ -159,6 +159,7 @@ def compute_results(score, score_name):
                                 "AUROC": roc_auc,
                                 "AUPRC": pr_auc,
                                 "FPR80": fpr80,
+                                "stat": stat_name,
                             })
         print(s)
         f = f"results-{score_name}-{reference_dataset}.txt"
