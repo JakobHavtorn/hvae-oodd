@@ -81,14 +81,20 @@ def load_data(files, negate_scores: bool = False):
     data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(defaultdict))))
     for f in files:
         reference_dataset = get_dataset(f)
+        stat = f.split("-")[1]
         iw_elbo, iw_elbo_k = get_iw(f)
         k = get_k(f)
 
         values = torch.load(os.path.join(args.source_dir, f))
 
-        for test_dataset, values in values.items():
-            values = np.array(values)
-            data[reference_dataset][test_dataset][k][iw_elbo][iw_elbo_k] = values if not negate_scores else -values
+        for test_dataset, v in values.items():
+            if isinstance(v, dict):
+                for stat, values in v.items():
+                    values = np.array(values)
+                    data[reference_dataset][test_dataset][stat][k][iw_elbo][iw_elbo_k] = values if not negate_scores else -values
+            else:
+                values = np.array(v)
+                data[reference_dataset][test_dataset][stat][k][iw_elbo][iw_elbo_k] = values if not negate_scores else -values
 
     return data
 
@@ -105,52 +111,55 @@ def write_text_file(filepath, string):
 ALL_RESULTS = []
 
 def compute_results(score, score_name):
-    results = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(defaultdict))))
+    results = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(defaultdict)))))
     for reference_dataset in score.keys():
         test_datasets = sorted(list(score[reference_dataset].keys()))
         s = f"========== {reference_dataset} (in-distribution) ==========\n"
 
         for test_dataset in test_datasets:
-            k_values = sorted(list(score[reference_dataset][test_dataset].keys()))
+            stat_names = sorted(list(score[reference_dataset][test_dataset].keys()))
 
-            for k in k_values:
-                iw_elbos = sorted(list(score[reference_dataset][test_dataset][k].keys()))
+            for stat_name in stat_names:
+                k_values = sorted(list(score[reference_dataset][test_dataset][stat_name].keys()))
 
-                for iw_elbo in iw_elbos:
-                    iw_elbo_ks = sorted(list(score[reference_dataset][test_dataset][k][iw_elbo].keys()))
+                for k in k_values:
+                    iw_elbos = sorted(list(score[reference_dataset][test_dataset][stat_name][k].keys()))
 
-                    for iw_elbo_k in iw_elbo_ks:
-                        reference_scores = score[reference_dataset][reference_dataset][k][iw_elbo][iw_elbo_k]
-                        test_scores = score[reference_dataset][test_dataset][k][iw_elbo][iw_elbo_k]
+                    for iw_elbo in iw_elbos:
+                        iw_elbo_ks = sorted(list(score[reference_dataset][test_dataset][stat_name][k][iw_elbo].keys()))
 
-                        # compute metrics
-                        y_true = np.array([*[0] * len(reference_scores), *[1] * len(test_scores)])
-                        y_score = np.concatenate([reference_scores, test_scores])
+                        for iw_elbo_k in iw_elbo_ks:
+                            reference_scores = score[reference_dataset][reference_dataset][stat_name][k][iw_elbo][iw_elbo_k]
+                            test_scores = score[reference_dataset][test_dataset][stat_name][k][iw_elbo][iw_elbo_k]
 
-                        (
-                            (roc_auc, fpr, tpr, thresholds),
-                            (pr_auc, precision, recall, thresholds),
-                            fpr80,
-                        ) = compute_roc_pr_metrics(y_true=y_true, y_score=y_score, reference_class=0)
+                            # compute metrics
+                            y_true = np.array([*[0] * len(reference_scores), *[1] * len(test_scores)])
+                            y_score = np.concatenate([reference_scores, test_scores])
 
-                        results[reference_dataset][test_dataset][k][iw_elbo][iw_elbo_k] = dict(
-                            roc=dict(roc_auc=roc_auc, fpr=fpr, tpr=tpr, thresholds=thresholds),
-                            pr=dict(pr_auc=pr_auc, precision=precision, recall=recall, thresholds=thresholds),
-                            fpr80=fpr80,
-                        )
+                            (
+                                (roc_auc, fpr, tpr, thresholds),
+                                (pr_auc, precision, recall, thresholds),
+                                fpr80,
+                            ) = compute_roc_pr_metrics(y_true=y_true, y_score=y_score, reference_class=0)
 
-                        s += f"{test_dataset:20s} | k={k:1d} | iw_elbo={iw_elbo:<4d} | iw_elbo_k={iw_elbo_k:<4d} | AUROC={roc_auc:6.4f}, AUPRC={pr_auc:6.4f}, FPR80={fpr80:6.4f}\n"
-                        ALL_RESULTS.append({
-                            "reference_dataset": reference_dataset,
-                            "dataset": test_dataset,
-                            "score_name": score_name,
-                            "k": k,
-                            "iw_elbo": iw_elbo,
-                            "iw_elbo_k": iw_elbo_k,
-                            "AUROC": roc_auc,
-                            "AUPRC": pr_auc,
-                            "FPR80": fpr80,
-                        })
+                            results[reference_dataset][test_dataset][stat_name][k][iw_elbo][iw_elbo_k] = dict(
+                                roc=dict(roc_auc=roc_auc, fpr=fpr, tpr=tpr, thresholds=thresholds),
+                                pr=dict(pr_auc=pr_auc, precision=precision, recall=recall, thresholds=thresholds),
+                                fpr80=fpr80,
+                            )
+
+                            s += f"{test_dataset:20s} | k={k:1d} | iw_elbo={iw_elbo:<4d} | iw_elbo_k={iw_elbo_k:<4d} | AUROC={roc_auc:6.4f}, AUPRC={pr_auc:6.4f}, FPR80={fpr80:6.4f}\n"
+                            ALL_RESULTS.append({
+                                "reference_dataset": reference_dataset,
+                                "dataset": test_dataset,
+                                "score_name": score_name,
+                                "k": k,
+                                "iw_elbo": iw_elbo,
+                                "iw_elbo_k": iw_elbo_k,
+                                "AUROC": roc_auc,
+                                "AUPRC": pr_auc,
+                                "FPR80": fpr80,
+                            })
         print(s)
         f = f"results-{score_name}-{reference_dataset}.txt"
         write_text_file(get_save_path(f), s)
