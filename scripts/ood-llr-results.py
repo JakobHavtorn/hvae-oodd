@@ -159,12 +159,23 @@ def compute_results(score, score_name):
 
 
 all_files = [f for f in os.listdir(args.source_dir) if f.endswith(".pt")]
+print(all_files)
 
 all_scores = [f for f in all_files if "scores" in f]
+print(all_scores)
+
 all_elbo_k = [f for f in all_files if "elbos_k" in f]
+print(all_elbo_k)
+
+all_likelihoods = [f for f in all_files if "likelihoods" in f]
+print(all_likelihoods)
+
+all_stats = [f for f in all_files if "stats" in f]
+print(all_stats)
 
 scores = load_data(all_scores, negate_scores=False)
 elbo_k = load_data(all_elbo_k, negate_scores=True)
+likelihoods = load_data(all_likelihoods, negate_scores=True)
 
 rich.print(
     "[bold magenta]================================================ LLR ================================================[/]"
@@ -174,5 +185,9 @@ rich.print(
     "[bold magenta]================================================ L>k ================================================[/]"
 )
 results_elbo_k = compute_results(elbo_k, score_name="elbo_k")
+rich.print(
+    "[bold magenta]============================================= Likelihoods =============================================[/]"
+)
+results_likelihoods = compute_results(likelihoods, score_name="likelihoods")
 results_df = pd.DataFrame(ALL_RESULTS)
 results_df.to_csv("results.csv", index=None)
