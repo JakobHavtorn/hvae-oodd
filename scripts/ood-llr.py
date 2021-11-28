@@ -92,7 +92,7 @@ rich.print(datamodule)
 TRAIN_DATASET_KEY = list(datamodule.train_datasets.keys())[0]
 LOGGER.info("Train dataset %s", TRAIN_DATASET_KEY)
 
-MAIN_DATASET_NAME = datamodule.primary_val_name.strip("Binarized").strip("Quantized").strip("Dequantized")
+MAIN_DATASET_NAME = list(datamodule.train_datasets.keys())[0].strip("Binarized").strip("Quantized").strip("Dequantized")
 LOGGER.info("Main dataset %s", MAIN_DATASET_NAME)
 
 IN_DIST_DATASET = MAIN_DATASET_NAME + " test"
