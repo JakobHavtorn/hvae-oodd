@@ -87,7 +87,7 @@ def load_data(files, negate_scores: bool = False):
 
         values = torch.load(os.path.join(args.source_dir, f))
 
-        if "stats" in f:
+        if "stat" in f:
             for dataset_stat, v in values.items():
                 test_dataset = dataset_stat.split("|")[0]
                 stat = dataset_stat.split("|")[1]
@@ -175,24 +175,13 @@ def compute_results(score, score_name):
 
 
 all_files = [f for f in os.listdir(args.source_dir) if f.endswith(".pt")]
-print(all_files)
 
-all_scores = [f for f in all_files if "scores" in f]
-print(all_scores)
-
-all_elbo_k = [f for f in all_files if "elbos_k" in f]
-print(all_elbo_k)
-
-all_likelihoods = [f for f in all_files if "likelihoods_k" in f]
-print(all_likelihoods)
-
-all_stats = [f for f in all_files if "stats_k" in f]
-print(all_stats)
-
-scores = load_data(all_scores, negate_scores=False)
-elbo_k = load_data(all_elbo_k, negate_scores=True)
-likelihoods = load_data(all_likelihoods, negate_scores=True)
-stats = load_data(all_stats, negate_scores=False)
+scores = load_data([f for f in all_files if "scores" in f], negate_scores=False)
+elbo_k = load_data([f for f in all_files if "elbos_k" in f], negate_scores=True)
+likelihoods = load_data([f for f in all_files if "likelihoods_k" in f], negate_scores=True)
+stats = load_data([f for f in all_files if "stats_k" in f], negate_scores=False)
+stat_scores_sub = load_data([f for f in all_files if "stat_scores_sub" in f], negate_scores=False)
+stat_scores_div = load_data([f for f in all_files if "stat_scores_div" in f], negate_scores=False)
 
 rich.print(
     "[bold magenta]================================================ LLR ================================================[/]"
@@ -210,5 +199,13 @@ rich.print(
     "[bold magenta]============================================= Stats =============================================[/]"
 )
 results_stats = compute_results(stats, score_name="stats")
+rich.print(
+    "[bold magenta]============================================= Stat scores sub =============================================[/]"
+)
+results_stats = compute_results(stat_scores_sub, score_name="stat_scores_sub")
+rich.print(
+    "[bold magenta]=============================================  Stat scores div =============================================[/]"
+)
+results_stats = compute_results(stat_scores_div, score_name="stat_scores_div")
 results_df = pd.DataFrame(ALL_RESULTS)
 results_df.to_csv("results.csv", index=None)

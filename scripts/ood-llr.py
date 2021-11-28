@@ -209,7 +209,7 @@ def stack_and_mean(stats):
 
 def get_stats_scores(sample_stats, sample_stats_k):
     ks = set(sample_stats.keys()) & set(sample_stats_k.keys())
-    return {k: sample_stats - sample_stats_k, for k in ks}
+    return {k: sample_stats - sample_stats_k for k in ks}
 
 
 with torch.no_grad():
@@ -299,7 +299,7 @@ with torch.no_grad():
                 stats[dataset][k].extend(v.tolist())
             for k, v in sample_stats_k.items():
                 stats_k[dataset][k].extend(v.tolist())
-            for k, v in sample_stats_scores_subtract.items():
+            for k, v in sample_stats_scores_sub.items():
                 stats_scores_sub[dataset][k + '_sub'].extend(v.tolist())
             for k, v in sample_stats_scores_div.items():
                 stats_scores_div[dataset][k + '_div'].extend(v.tolist())
