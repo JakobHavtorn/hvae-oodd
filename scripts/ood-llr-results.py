@@ -154,7 +154,7 @@ def compute_results(score, score_name):
                                 fpr80=fpr80,
                             )
 
-                            s += f"{stat_name:5s} | {test_dataset:20s} | k={k:1d} | iw_elbo={iw_elbo:<4d} | iw_elbo_k={iw_elbo_k:<4d} | AUROC={roc_auc:6.4f}, AUPRC={pr_auc:6.4f}, FPR80={fpr80:6.4f}\n"
+                            s += f"{stat_name:20s} | {test_dataset:20s} | k={k:1d} | iw_elbo={iw_elbo:<4d} | iw_elbo_k={iw_elbo_k:<4d} | AUROC={roc_auc:6.4f}, AUPRC={pr_auc:6.4f}, FPR80={fpr80:6.4f}\n"
                             ALL_RESULTS.append({
                                 "reference_dataset": reference_dataset,
                                 "dataset": test_dataset,
