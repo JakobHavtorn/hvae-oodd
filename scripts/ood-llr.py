@@ -145,7 +145,8 @@ likelihoods_k = defaultdict(list)
 
 stats = defaultdict(lambda: defaultdict(list))
 stats_k = defaultdict(lambda: defaultdict(list))
-stats_scores = defaultdict(lambda: defaultdict(list))
+stats_scores_sub = defaultdict(lambda: defaultdict(list))
+stats_scores_div = defaultdict(lambda: defaultdict(list))
 
 def update_key(sample_stats, x, k):
     sample_stats[f"{k}_sum"].append(sum(x))
@@ -284,7 +285,8 @@ with torch.no_grad():
             sample_stats = stack_and_mean(sample_stats)
             sample_stats_k = stack_and_mean(sample_stats_k)
 
-            sample_stats_scores = get_stats_scores(sample_stats, sample_stats_k)
+            sample_stats_scores_sub = get_stats_scores_sub(sample_stats, sample_stats_k)
+            sample_stats_scores_div = get_stats_scores_div(sample_stats, sample_stats_k)
             score = sample_elbo - sample_elbo_k
 
             scores[dataset].extend(score.tolist())
@@ -297,9 +299,10 @@ with torch.no_grad():
                 stats[dataset][k].extend(v.tolist())
             for k, v in sample_stats_k.items():
                 stats_k[dataset][k].extend(v.tolist())
-            for k, v in sample_stats_scores.items():
-                stats_scores[dataset][k].extend(v.tolist())
-
+            for k, v in sample_stats_scores_subtract.items():
+                stats_scores_sub[dataset][k + '_sub'].extend(v.tolist())
+            for k, v in sample_stats_scores_div.items():
+                stats_scores_div[dataset][k + '_div'].extend(v.tolist())
 
             if n > N_EQUAL_EXAMPLES_CAP:
                 LOGGER.warning(f"Skipping remaining iterations due to {N_EQUAL_EXAMPLES_CAP=}")
@@ -319,4 +322,5 @@ torch.save(likelihoods, get_save_path(f"values-likelihoods-{IN_DIST_DATASET}-{FI
 torch.save(likelihoods_k, get_save_path(f"values-likelihoods_k-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
 torch.save({f"{dataset}|{k}": v for dataset, d in stats.items() for k, v in d.items() }, get_save_path(f"values-stats-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
 torch.save({f"{dataset}|{k}": v for dataset, d in stats_k.items() for k, v in d.items() }, get_save_path(f"values-stats_k-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
-torch.save({f"{dataset}|{k}": v for dataset, d in stats_scores.items() for k, v in d.items() }, get_save_path(f"values-stat_scores-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
+torch.save({f"{dataset}|{k}": v for dataset, d in stats_scores_sub.items() for k, v in d.items() }, get_save_path(f"values-stat_scores_sub-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
+torch.save({f"{dataset}|{k}": v for dataset, d in stats_scores_div.items() for k, v in d.items() }, get_save_path(f"values-stat_scores_div-{IN_DIST_DATASET}-{FILE_NAME_SETTINGS_SPEC}.pt"))
