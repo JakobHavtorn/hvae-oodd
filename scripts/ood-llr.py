@@ -209,11 +209,11 @@ def stack_and_mean(stats):
 
 def get_stats_scores_sub(sample_stats, sample_stats_k):
     ks = set(sample_stats.keys()) & set(sample_stats_k.keys())
-    return {k: sample_stats - sample_stats_k for k in ks}
+    return {k: sample_stats[k] - sample_stats_k[k] for k in ks}
 
 def get_stats_scores_div(sample_stats, sample_stats_k):
     ks = set(sample_stats.keys()) & set(sample_stats_k.keys())
-    return {k: sample_stats / sample_stats_k for k in ks}
+    return {k: sample_stats[k] / sample_stats_k[k] for k in ks}
 
 with torch.no_grad():
     for dataset, dataloader in dataloaders:
