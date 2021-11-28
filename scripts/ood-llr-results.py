@@ -189,6 +189,7 @@ print(all_stats)
 scores = load_data(all_scores, negate_scores=False)
 elbo_k = load_data(all_elbo_k, negate_scores=True)
 likelihoods = load_data(all_likelihoods, negate_scores=True)
+stats = load_data(all_stats, negate_scores=False)
 
 rich.print(
     "[bold magenta]================================================ LLR ================================================[/]"
@@ -202,6 +203,6 @@ rich.print(
     "[bold magenta]============================================= Likelihoods =============================================[/]"
 )
 results_likelihoods = compute_results(likelihoods, score_name="likelihoods")
-# results_stats = compute_results(stats, score_name="stats")
+results_stats = compute_results(, score_name="stats")
 results_df = pd.DataFrame(ALL_RESULTS)
 results_df.to_csv("results.csv", index=None)
