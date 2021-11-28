@@ -88,10 +88,10 @@ def load_data(files, negate_scores: bool = False):
         values = torch.load(os.path.join(args.source_dir, f))
 
         if "stats" in f:
-            for dataset_stat, values in v.items():
+            for dataset_stat, v in values.items():
                 test_dataset = dataset_stat.split("|")[0]
                 stat = dataset_stat.split("|")[1]
-                values = np.array(values)
+                values = np.array(v)
                 data[reference_dataset][test_dataset][stat][k][iw_elbo][iw_elbo_k] = values if not negate_scores else -values
 
         else:
