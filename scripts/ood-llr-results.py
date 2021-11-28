@@ -180,10 +180,10 @@ print(all_scores)
 all_elbo_k = [f for f in all_files if "elbos_k" in f]
 print(all_elbo_k)
 
-all_likelihoods = [f for f in all_files if "likelihoods" in f]
+all_likelihoods = [f for f in all_files if "likelihoods_k" in f]
 print(all_likelihoods)
 
-all_stats = [f for f in all_files if "stats" in f]
+all_stats = [f for f in all_files if "stats_k" in f]
 print(all_stats)
 
 scores = load_data(all_scores, negate_scores=False)
