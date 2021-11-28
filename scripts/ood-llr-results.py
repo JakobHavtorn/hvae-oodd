@@ -151,7 +151,7 @@ def compute_results(score, score_name):
                                 fpr80=fpr80,
                             )
 
-                            s += f"{test_dataset:20s} | k={k:1d} | iw_elbo={iw_elbo:<4d} | iw_elbo_k={iw_elbo_k:<4d} | AUROC={roc_auc:6.4f}, AUPRC={pr_auc:6.4f}, FPR80={fpr80:6.4f}\n"
+                            s += f"{stat_name:5s} | {test_dataset:20s} | k={k:1d} | iw_elbo={iw_elbo:<4d} | iw_elbo_k={iw_elbo_k:<4d} | AUROC={roc_auc:6.4f}, AUPRC={pr_auc:6.4f}, FPR80={fpr80:6.4f}\n"
                             ALL_RESULTS.append({
                                 "reference_dataset": reference_dataset,
                                 "dataset": test_dataset,
@@ -202,5 +202,6 @@ rich.print(
     "[bold magenta]============================================= Likelihoods =============================================[/]"
 )
 results_likelihoods = compute_results(likelihoods, score_name="likelihoods")
+# results_stats = compute_results(stats, score_name="stats")
 results_df = pd.DataFrame(ALL_RESULTS)
 results_df.to_csv("results.csv", index=None)
