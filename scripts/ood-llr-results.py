@@ -117,6 +117,9 @@ def compute_results(score, score_name):
         s = f"========== {reference_dataset} (in-distribution) ==========\n"
 
         for test_dataset in test_datasets:
+            if test_dataset.split()[0] == reference_dataset.split()[0]:
+                continue
+
             stat_names = sorted(list(score[reference_dataset][test_dataset].keys()))
 
             for stat_name in stat_names:
