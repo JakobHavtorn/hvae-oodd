@@ -87,12 +87,15 @@ def load_data(files, negate_scores: bool = False):
 
         values = torch.load(os.path.join(args.source_dir, f))
 
-        for test_dataset, v in values.items():
-            if isinstance(v, dict):
-                for stat, values in v.items():
-                    values = np.array(values)
-                    data[reference_dataset][test_dataset][stat][k][iw_elbo][iw_elbo_k] = values if not negate_scores else -values
-            else:
+        if "stats" in f:
+            for dataset_stat, values in v.items():
+                test_dataset = dataset_stat.split("|")[0]
+                stat = dataset_stat.split("|")[1]
+                values = np.array(values)
+                data[reference_dataset][test_dataset][stat][k][iw_elbo][iw_elbo_k] = values if not negate_scores else -values
+
+        else:
+            for test_dataset, v in values.items():
                 values = np.array(v)
                 data[reference_dataset][test_dataset][stat][k][iw_elbo][iw_elbo_k] = values if not negate_scores else -values
 
@@ -203,6 +206,9 @@ rich.print(
     "[bold magenta]============================================= Likelihoods =============================================[/]"
 )
 results_likelihoods = compute_results(likelihoods, score_name="likelihoods")
+rich.print(
+    "[bold magenta]============================================= Stats =============================================[/]"
+)
 results_stats = compute_results(stats, score_name="stats")
 results_df = pd.DataFrame(ALL_RESULTS)
 results_df.to_csv("results.csv", index=None)
