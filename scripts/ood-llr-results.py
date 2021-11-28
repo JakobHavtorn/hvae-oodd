@@ -203,6 +203,6 @@ rich.print(
     "[bold magenta]============================================= Likelihoods =============================================[/]"
 )
 results_likelihoods = compute_results(likelihoods, score_name="likelihoods")
-results_stats = compute_results(, score_name="stats")
+results_stats = compute_results(stats, score_name="stats")
 results_df = pd.DataFrame(ALL_RESULTS)
 results_df.to_csv("results.csv", index=None)
