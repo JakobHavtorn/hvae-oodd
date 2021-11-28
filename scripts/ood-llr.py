@@ -198,7 +198,7 @@ def update_sample_stats(sample_stats, stage_datas):
 
 def stack_and_mean(stats):
     grouped_stats = {}
-    stats = {k: [dic[k] for dic in stats] for k in stats[0]}
+    # stats = {k: [dic[k] for dic in stats] for k in stats[0]}
     for k, v in stats.items():
         x = torch.stack(v, dim=0)
         grouped_stats[k] = torch.mean(x, dim=0)
