@@ -26,14 +26,13 @@ LOGGER = logging.getLogger()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="/scratch/s193223/oodd/models/FashionMNIST-21-01-15-15-35-21.236574", help="model")
+parser.add_argument("--n_eval_examples", type=int, default=float("inf"), help="cap on the number of examples to use")
 parser.add_argument("--save_dir", type=str, default="/scratch/s193223/oodd/results", help="directory to store scores in")
 
 args = parser.parse_args()
 rich.print(vars(args))
 
 os.makedirs(args.save_dir, exist_ok=True)
-
-FILE_NAME_SETTINGS_SPEC = f"k{args.n_latents_skip}-iw_elbo{args.iw_samples_elbo}-iw_lK{args.iw_samples_Lk}"
 
 def get_save_path(name):
     name = name.replace(" ", "-")
