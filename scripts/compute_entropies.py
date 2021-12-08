@@ -86,4 +86,4 @@ for dataset, dataloader in dataloaders:
 # print likelihoods
 for dataset in sorted(complexities.keys()):
     print("===============", dataset, "===============")
-    print("mean complexity: ")
+    print("mean complexity: ", np.mean(complexities[dataset]))
