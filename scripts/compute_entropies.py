@@ -64,7 +64,13 @@ complexities = defaultdict(list)
 
 
 def complexity_metric(x):
-    return np.mean(entropy(x, disk(3)))
+    x = (x * 255).numpy().astype("uint8")
+    entropies_per_channel = []
+    for i in range(x.shape[0]):
+        entropies_per_channel.append(
+            np.mean(entropy(x[i], disk(3)))
+        )
+    return np.mean(entropies_per_channel)
 
 
 for dataset, dataloader in dataloaders:
