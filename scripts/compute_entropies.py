@@ -92,7 +92,7 @@ for dataset, dataloader in dataloaders:
         complexities[dataset].append(complexity_metric(x, args.complexity_param))
 
         if n > N_EQUAL_EXAMPLES_CAP:
-            LOGGER.warning(f"Skipping remaining iterations due to {N_EQUAL_EXAMPLES_CAP=}")
+            LOGGER.warning(f"Skipping remaining iterations due to {N_EQUAL_EXAMPLES_CAP}")
             break
 
 
