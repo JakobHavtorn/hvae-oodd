@@ -32,11 +32,8 @@ args = parser.parse_args()
 rich.print(vars(args))
 
 os.makedirs(args.save_dir, exist_ok=True)
-device = oodd.utils.get_device() if args.device == "auto" else torch.device(args.device)
-LOGGER.info("Device %s", device)
 
 FILE_NAME_SETTINGS_SPEC = f"k{args.n_latents_skip}-iw_elbo{args.iw_samples_elbo}-iw_lK{args.iw_samples_Lk}"
-
 
 def get_save_path(name):
     name = name.replace(" ", "-")
