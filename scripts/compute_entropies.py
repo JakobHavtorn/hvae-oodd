@@ -80,7 +80,6 @@ def get_size_bytesio(img, ext="JPEG", optimize=False):
     with io.BytesIO() as f:
         img.save(f, ext, optimize=optimize)
         s = f.getbuffer().nbytes
-        print(s)
     return s
 
 def compression(x, mode=0):
