@@ -120,11 +120,7 @@ for dataset, dataloader in dataloaders:
             LOGGER.warning(f"Skipping remaining iterations due to {N_EQUAL_EXAMPLES_CAP}")
             break
 
-
-# print likelihoods
-for dataset in sorted(complexities.keys()):
-    print("===============", dataset, "===============")
-    print(f"mean {args.complexity}: ", np.mean(complexities[dataset]))
+    print(f"mean {args.complexity}({args.complexity_param}): ", np.mean(complexities[dataset]))
 
 
 torch.save(complexities, get_save_path(f"complexity_{ args.complexity}_{args.complexity_param}.pt"))
