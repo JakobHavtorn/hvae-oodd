@@ -23,6 +23,8 @@ LOGGER = logging.getLogger()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset_name", type=str, default="FashionMNISTBinarized", help="model")
+parser.add_argument("--complexity", type=str, default="mean_local_entropy", help="complexity metric")
+parser.add_argument("--complexity_param", type=int, default=3, help="radius or other parameter")
 parser.add_argument("--n_eval_examples", type=int, default=float("inf"), help="cap on the number of examples to use")
 parser.add_argument("--save_dir", type=str, default="/scratch/s193223/oodd/results", help="directory to store scores in")
 parser = oodd.datasets.DataModule.get_argparser(parents=[parser])
@@ -63,15 +65,20 @@ dataloaders = {(k + " test", v) for k, v in datamodule.val_loaders.items()}
 complexities = defaultdict(list)
 
 
-def complexity_metric(x):
+def mean_local_entropy(x, radius=3):
     x = (x * 255).numpy().astype("uint8")
     entropies_per_channel = []
     for i in range(x.shape[0]):
         entropies_per_channel.append(
-            np.mean(entropy(x[i], disk(3)))
+            np.mean(entropy(x[i], disk(radius)))
         )
     return np.mean(entropies_per_channel)
 
+complexity_metrics = {
+    "mean_local_entropy": mean_local_entropy
+}
+
+complexity_metric = complexity_metrics[args.complexity]
 
 for dataset, dataloader in dataloaders:
     dataset = dataset.replace("Binarized", "").replace("Quantized", "").replace("Dequantized", "")
@@ -82,7 +89,7 @@ for dataset, dataloader in dataloaders:
         n += x.shape[0]
         x = x[0]
 
-        complexities[dataset].append(complexity_metric(x))
+        complexities[dataset].append(complexity_metric(x, args.complexity_param))
 
         if n > N_EQUAL_EXAMPLES_CAP:
             LOGGER.warning(f"Skipping remaining iterations due to {N_EQUAL_EXAMPLES_CAP=}")
@@ -92,4 +99,7 @@ for dataset, dataloader in dataloaders:
 # print likelihoods
 for dataset in sorted(complexities.keys()):
     print("===============", dataset, "===============")
-    print("mean complexity: ", np.mean(complexities[dataset]))
+    print(f"mean {args.complexity}: ", np.mean(complexities[dataset]))
+
+
+torch.save(complexities, get_save_path(f"complexity_{ args.complexity}_{args.complexity_param}.pt"))
