@@ -84,6 +84,7 @@ def get_size_bytesio(img, ext="JPEG", optimize=False):
     return s
 
 def compression(x, mode=0):
+    x = (x * 255).numpy().astype("uint8")
     if x.shape[0] == 1:
         x = x[0]
     else:
@@ -120,6 +121,11 @@ for dataset, dataloader in dataloaders:
             LOGGER.warning(f"Skipping remaining iterations due to {N_EQUAL_EXAMPLES_CAP}")
             break
 
+    print(f"mean {args.complexity}({args.complexity_param}): ", np.mean(complexities[dataset]))
+
+
+for dataset in sorted(complexities.keys()):
+    print("===============", dataset, "===============")
     print(f"mean {args.complexity}({args.complexity_param}): ", np.mean(complexities[dataset]))
 
 
