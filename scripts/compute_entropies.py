@@ -5,7 +5,6 @@ import os
 import logging
 
 from collections import defaultdict
-from typing import *
 
 from tqdm import tqdm
 
@@ -13,13 +12,11 @@ import rich
 import numpy as np
 import torch
 
-import oodd
 import oodd.datasets
-import oodd.evaluators
-import oodd.models
-import oodd.losses
 import oodd.utils
-from oodd.utils import reduce_to_batch
+
+from skimage.filters.rank import entropy
+from skimage.morphology import disk
 
 LOGGER = logging.getLogger()
 
@@ -62,9 +59,13 @@ N_EQUAL_EXAMPLES_CAP = min([args.n_eval_examples, N_EQUAL_EXAMPLES_CAP])
 LOGGER.info("%s = %s", "N_EQUAL_EXAMPLES_CAP", N_EQUAL_EXAMPLES_CAP)
 
 dataloaders = {(k + " test", v) for k, v in datamodule.val_loaders.items()}
-dataloaders |= {(k + " train", v) for k, v in datamodule.test_loaders.items()}
 
 complexities = defaultdict(list)
+
+
+def complexity_metric(x):
+    return np.mean(entropy(x, disk(3)))
+
 
 for dataset, dataloader in dataloaders:
     dataset = dataset.replace("Binarized", "").replace("Quantized", "").replace("Dequantized", "")
@@ -73,6 +74,10 @@ for dataset, dataloader in dataloaders:
     n = 0
     for b, (x, _) in tqdm(enumerate(dataloader), total=N_EQUAL_EXAMPLES_CAP / 1):
         n += x.shape[0]
+        x = x[0]
+
+        complexities[dataset].append(complexity_metric(x))
+
         if n > N_EQUAL_EXAMPLES_CAP:
             LOGGER.warning(f"Skipping remaining iterations due to {N_EQUAL_EXAMPLES_CAP=}")
             break
