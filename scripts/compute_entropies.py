@@ -1,11 +1,13 @@
 """Script to evaluate the OODD scores (LLR and L>k) for a saved HVAE"""
 
 import argparse
+import io
 import os
 import logging
 
 from collections import defaultdict
 
+from PIL import Image
 from tqdm import tqdm
 
 import rich
@@ -24,7 +26,7 @@ LOGGER = logging.getLogger()
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset_name", type=str, default="FashionMNISTBinarized", help="model")
 parser.add_argument("--complexity", type=str, default="mean_local_entropy", help="complexity metric")
-parser.add_argument("--complexity_param", type=int, default=3, help="radius or other parameter")
+parser.add_argument("--complexity_param", type=int, default=3, help="locality radius or compression mode")
 parser.add_argument("--n_eval_examples", type=int, default=float("inf"), help="cap on the number of examples to use")
 parser.add_argument("--save_dir", type=str, default="/scratch/s193223/oodd/results", help="directory to store scores in")
 parser = oodd.datasets.DataModule.get_argparser(parents=[parser])
@@ -74,8 +76,31 @@ def mean_local_entropy(x, radius=3):
         )
     return np.mean(entropies_per_channel)
 
+def get_size_bytesio(img, ext="JPEG", optimize=False):
+    with io.BytesIO() as f:
+        img.save(f, ext, optimize=optimize)
+        s = f.getbuffer().nbytes
+        print(s)
+    return s
+
+def compression(x, mode=0):
+    if x.shape[0] == 1:
+        x = x[0]
+    else:
+        x = x.transpose(1,2,0)
+    img = Image.fromarray(x)
+    if mode == 0: # JPEG optimized/not-optimized
+        optimized = get_size_bytesio(img, ext="JPEG", optimize=True)
+        unoptimized = get_size_bytesio(img, ext="JPEG", optimize=False)
+        return optimized / unoptimized
+
+    if mode == 1: # JPEG optimized
+        optimized = get_size_bytesio(img, ext="JPEG", optimize=True)
+        return optimized
+
 complexity_metrics = {
-    "mean_local_entropy": mean_local_entropy
+    "mean_local_entropy": mean_local_entropy,
+    "compression": compression,
 }
 
 complexity_metric = complexity_metrics[args.complexity]
