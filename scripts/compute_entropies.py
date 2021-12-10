@@ -111,12 +111,12 @@ for dataset, dataloader in dataloaders:
 
     n = 0
     for b, (x, _) in tqdm(enumerate(dataloader), total=N_EQUAL_EXAMPLES_CAP / 1):
+        n += x.shape[0]
 
         x = x[0]
 
         complexities[dataset].append(complexity_metric(x, args.complexity_param))
 
-        n += x.shape[0]
         if n >= N_EQUAL_EXAMPLES_CAP:
             LOGGER.warning(f"Skipping remaining iterations due to {N_EQUAL_EXAMPLES_CAP}")
             break
