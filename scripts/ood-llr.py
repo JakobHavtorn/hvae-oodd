@@ -110,8 +110,9 @@ if MAIN_DATASET_NAME in ["FashionMNIST", "MNIST"]:
     extra_test = {TRAIN_DATASET_KEY: dict(split="train", dynamic=False)}
 elif MAIN_DATASET_NAME in ["CIFAR10", "SVHN"]:
     extra_val = dict(
-        CIFAR10DequantizedGrey=dict(split='test', preprocess='deterministic'),
-        CIFAR100Dequantized=dict(split='test', preprocess='deterministic'),
+        CIFAR10DequantizedGrey=dict(split='test', dynamic=False),
+        CIFAR100Dequantized=dict(split='test', dynamic=False),
+        CIFAR100DequantizedGrey=dict(split='test', dynamic=False),
     )
     extra_test = {TRAIN_DATASET_KEY: dict(split="train", dynamic=False)}
 else:

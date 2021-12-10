@@ -181,6 +181,23 @@ class CIFAR10DequantizedGrey(CIFAR10Quantized):
     )
 
 
+
+class CIFAR100Quantized(TorchVisionDataset):
+    _data_source = torchvision.datasets.CIFAR100  # Shape [N, 32, 32, 3]
+    _split_args = {TRAIN_SPLIT: {"train": True}, VAL_SPLIT: {"train": False}, TEST_SPLIT: {"train": False}}
+    default_transform = torchvision.transforms.ToTensor()
+    root_subdir = "CIFAR100"
+
+
+class CIFAR100Dequantized(CIFAR100Quantized):
+    default_transform = TRANSFORM_DEQUANTIZE_8BIT
+
+
+class CIFAR100DequantizedGrey(CIFAR100Quantized):
+    default_transform = torchvision.transforms.Compose(
+        [TRANSFORM_DEQUANTIZE_8BIT, transforms.Grayscale(num_output_channels=3)]
+    )
+
 class SVHNQuantized(TorchVisionDataset):
     _data_source = torchvision.datasets.SVHN  # Shape [N, 32, 32, 3]
     _split_args = {TRAIN_SPLIT: {"split": "train"}, VAL_SPLIT: {"split": "extra"}, TEST_SPLIT: {"split": "test"}}
