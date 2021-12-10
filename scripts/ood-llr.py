@@ -110,7 +110,6 @@ if MAIN_DATASET_NAME in ["FashionMNIST", "MNIST"]:
         Omniglot28x28Binarized=dict(split='validation'),
         Omniglot28x28InvertedBinarized=dict(split='validation'),
         SmallNORB28x28Binarized=dict(split='validation'),
-        SmallNORB28x28InvertedBinarized=dict(split='validation'),
         KMNISTBinarized=dict(split='validation', dynamic=False)
     )
     extra_test = {TRAIN_DATASET_KEY: dict(split="train", dynamic=False)}
