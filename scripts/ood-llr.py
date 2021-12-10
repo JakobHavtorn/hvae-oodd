@@ -100,12 +100,18 @@ TRAIN_DATASET = MAIN_DATASET_NAME + " train"
 LOGGER.info("Main in-distribution dataset %s", IN_DIST_DATASET)
 if MAIN_DATASET_NAME in ["FashionMNIST", "MNIST"]:
     extra_val = dict(
-        notMNISTQuantized=dict(split='validation'),
-        Omniglot28x28Quantized=dict(split='validation'),
-        Omniglot28x28InvertedQuantized=dict(split='validation'),
-        SmallNORB28x28Quantized=dict(split='validation'),
-        SmallNORB28x28InvertedQuantized=dict(split='validation'),
-        KMNISTDequantized=dict(split='validation', dynamic=False),  # Effectively quantized
+        # notMNISTQuantized=dict(split='validation'),
+        # Omniglot28x28Quantized=dict(split='validation'),
+        # Omniglot28x28InvertedQuantized=dict(split='validation'),
+        # SmallNORB28x28Quantized=dict(split='validation'),
+        # SmallNORB28x28InvertedQuantized=dict(split='validation'),
+        # KMNISTDequantized=dict(split='validation', dynamic=False),  # Effectively quantized
+        notMNISTBinarized=dict(split='validation'),
+        Omniglot28x28Binarized=dict(split='validation'),
+        Omniglot28x28InvertedBinarized=dict(split='validation'),
+        SmallNORB28x28Binarized=dict(split='validation'),
+        SmallNORB28x28InvertedBinarized=dict(split='validation'),
+        KMNISTBinarized=dict(split='validation', dynamic=False)
     )
     extra_test = {TRAIN_DATASET_KEY: dict(split="train", dynamic=False)}
 elif MAIN_DATASET_NAME in ["CIFAR10", "SVHN"]:
