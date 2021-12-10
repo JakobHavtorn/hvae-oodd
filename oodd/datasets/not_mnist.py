@@ -183,7 +183,7 @@ class notMNIST(data.Dataset):
         self.examples, self.targets = load_dataset_from_file(self.dataset_tarfile)
         self.targets = torch.LongTensor(self.targets)
 
-        self.shuffle(seed=19690720)
+        # self.shuffle(seed=19690720)
 
     def __getitem__(self, idx):
         """

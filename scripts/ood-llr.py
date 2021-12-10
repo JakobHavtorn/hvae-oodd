@@ -100,18 +100,18 @@ TRAIN_DATASET = MAIN_DATASET_NAME + " train"
 LOGGER.info("Main in-distribution dataset %s", IN_DIST_DATASET)
 if MAIN_DATASET_NAME in ["FashionMNIST", "MNIST"]:
     extra_val = dict(
-        # notMNISTQuantized=dict(split='validation'),
-        # Omniglot28x28Quantized=dict(split='validation'),
-        # Omniglot28x28InvertedQuantized=dict(split='validation'),
-        # SmallNORB28x28Quantized=dict(split='validation'),
-        # SmallNORB28x28InvertedQuantized=dict(split='validation'),
-        # KMNISTDequantized=dict(split='validation', dynamic=False),  # Effectively quantized
+        notMNISTQuantized=dict(split='validation'),
+        Omniglot28x28Quantized=dict(split='validation'),
+        Omniglot28x28InvertedQuantized=dict(split='validation'),
+        SmallNORB28x28Quantized=dict(split='validation'),
+        SmallNORB28x28InvertedQuantized=dict(split='validation'),
+        KMNISTDequantized=dict(split='validation', dynamic=False),  # Effectively quantized
     )
     extra_test = {TRAIN_DATASET_KEY: dict(split="train", dynamic=False)}
 elif MAIN_DATASET_NAME in ["CIFAR10", "SVHN"]:
     extra_val = dict(
-        # CIFAR10DequantizedGrey=dict(split='test', preprocess='deterministic'),
-        # CIFAR100Dequantized=dict(split='test', preprocess='deterministic'),
+        CIFAR10DequantizedGrey=dict(split='test', preprocess='deterministic'),
+        CIFAR100Dequantized=dict(split='test', preprocess='deterministic'),
     )
     extra_test = {TRAIN_DATASET_KEY: dict(split="train", dynamic=False)}
 else:
@@ -217,7 +217,8 @@ def get_stats_scores_div(sample_stats, sample_stats_k):
 
 with torch.no_grad():
     for dataset, dataloader in dataloaders:
-        dataset = dataset.replace("Binarized", "").replace("Quantized", "").replace("Dequantized", "")
+        # dataset = dataset.replace("Binarized", "").replace("Quantized", "").replace("Dequantized", "")
+        dataset = dataset
         print(f"Evaluating {dataset}")
 
         n = 0
