@@ -218,8 +218,7 @@ def get_stats_scores_div(sample_stats, sample_stats_k):
 
 with torch.no_grad():
     for dataset, dataloader in dataloaders:
-        # dataset = dataset.replace("Binarized", "").replace("Quantized", "").replace("Dequantized", "")
-        dataset = dataset
+        dataset = dataset.replace("Binarized", "").replace("Quantized", "").replace("Dequantized", "")
         print(f"Evaluating {dataset}")
 
         n = 0
