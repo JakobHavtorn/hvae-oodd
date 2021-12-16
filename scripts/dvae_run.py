@@ -39,6 +39,7 @@ parser.add_argument("--n_eval_samples", type=int, default=32, help="samples from
 parser.add_argument("--seed", type=int, default=1, metavar="S", help="random seed")
 parser.add_argument("--test_every", type=int, default=10, help="epochs between evaluations")
 parser.add_argument("--save_dir", type=str, default= "/scratch/s193223/oodd", help="directory for saving models")
+parser.add_argument("--tqdm", type=bool, action= "store_true", help="whether to display progressbar")
 parser = oodd.datasets.DataModule.get_argparser(parents=[parser])
 
 args, unknown_args = parser.parse_known_args()
@@ -74,7 +75,7 @@ def train(epoch):
     beta = next(deterministic_warmup)
     free_nats = next(free_nats_cooldown)
 
-    iterator = tqdm(enumerate(datamodule.train_loader), smoothing=0.9, total=len(datamodule.train_loader), leave=False)
+    iterator = tqdm(enumerate(datamodule.train_loader), smoothing=0.9, total=len(datamodule.train_loader), leave=False, disable=(not args.tqdm))
     for _, (x, _) in iterator:
         x = x.to(device)
 
@@ -136,7 +137,7 @@ def test(epoch, dataloader, evaluator, dataset_name="test", max_test_examples=fl
     wandb.log({f"reconstructions_{dataset_name}": images})
 
     decode_from_p_combinations = [[True] * n_p + [False] * (model.n_latents - n_p) for n_p in range(model.n_latents)]
-    for decode_from_p in tqdm(decode_from_p_combinations, leave=False):
+    for decode_from_p in tqdm(decode_from_p_combinations, leave=False, disable=(not args.tqdm)):
         n_skipped_latents = sum(decode_from_p)
 
         if max_test_examples != float("inf"):
@@ -145,9 +146,10 @@ def test(epoch, dataloader, evaluator, dataset_name="test", max_test_examples=fl
                 smoothing=0.9,
                 total=max_test_examples // dataloader.batch_size,
                 leave=False,
+                disable=(not args.tqdm)
             )
         else:
-            iterator = tqdm(enumerate(dataloader), smoothing=0.9, total=len(dataloader), leave=False)
+            iterator = tqdm(enumerate(dataloader), smoothing=0.9, total=len(dataloader), leave=False, disable=(not args.tqdm))
 
         for _, (x, _) in iterator:
             x = x.to(device)
