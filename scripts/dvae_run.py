@@ -51,13 +51,13 @@ device = get_device()
 
 def setup_wandb(train_dataset_name):
     # add tags and initialize wandb run
-    tags = [train_dataset_name, f"seed_{args.seed}"]
+    tags = [train_dataset_name, f"seed_{args.seed}", "train"]
 
     wandb.init(project="hvae", entity="johnnysummer", dir=args.save_dir, tags=tags)
     args.save_dir = wandb.run.dir
 
     # wandb configuration
-    run_name = "" + train_dataset_name + wandb.run.name.split("-")[-1]
+    run_name = train_dataset_name + "-" + wandb.run.name.split("-")[-1]
     wandb.run.name = run_name
     wandb.config.update(args)
     wandb.config.update({"train_dataset": train_dataset_name})
