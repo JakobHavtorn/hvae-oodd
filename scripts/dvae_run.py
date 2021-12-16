@@ -298,6 +298,9 @@ if __name__ == "__main__":
     model_argparser = model.get_argparser()
     model_args, unknown_model_args = model_argparser.parse_known_args()
     model_args.input_shape = in_shape
+    # update wandb
+    wandb.config.update(model_args)
+    wandb.run.save()
 
     model = model(**vars(model_args)).to(device)
 

@@ -1,0 +1,9 @@
+{
+   "FashionMNISTBinarized": {"dynamic": false, "split": "validation"},
+   "MNISTBinarized": {"dynamic": false, "split": "validation"},
+   "notMNISTBinarized": {"dynamic": false, "split": "validation"},
+   "Omniglot28x28Binarized": {"dynamic": false, "split": "validation"},
+   "Omniglot28x28InvertedBinarized": {"dynamic": false, "split": "validation"},
+   "SmallNORB28x28Binarized": {"dynamic": false, "split": "validation"},
+   "KMNISTBinarized": {"dynamic": false, "split": "validation"}
+}

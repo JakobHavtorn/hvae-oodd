@@ -1,0 +1,5 @@
+[
+   {"block": "GaussianConv2d", "latent_features": 8, "weightnorm": true},
+   {"block": "GaussianDense", "latent_features": 16, "weightnorm": true},
+   {"block": "GaussianDense", "latent_features": 8, "weightnorm": true}
+]
