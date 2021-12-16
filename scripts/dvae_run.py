@@ -32,13 +32,13 @@ parser.add_argument("--epochs", type=int, default=1000, help="number of epochs t
 parser.add_argument("--learning_rate", type=float, default=3e-4, help="learning rate")
 parser.add_argument("--samples", type=int, default=1, help="samples from approximate posterior")
 parser.add_argument("--importance_weighted", type=str2bool, default=False, const=True, nargs="?", help="use iw bound")
-parser.add_argument("--warmup_epochs", type=int, default=0, help="epochs to warm up the KL term.")
-parser.add_argument("--free_nats_epochs", type=int, default=0, help="epochs to warm up the KL term.")
-parser.add_argument("--free_nats", type=float, default=0, help="nats considered free in the KL term")
+parser.add_argument("--warmup_epochs", type=int, default=200, help="epochs to warm up the KL term.")
+parser.add_argument("--free_nats_epochs", type=int, default=400, help="epochs to warm up the KL term.")
+parser.add_argument("--free_nats", type=float, default=2, help="nats considered free in the KL term")
 parser.add_argument("--n_eval_samples", type=int, default=32, help="samples from prior for quality inspection")
 parser.add_argument("--seed", type=int, default=1, metavar="S", help="random seed")
-parser.add_argument("--test_every", type=int, default=1, help="epochs between evaluations")
-parser.add_argument("--save_dir", type=str, default=None, help="directory for saving models")
+parser.add_argument("--test_every", type=int, default=10, help="epochs between evaluations")
+parser.add_argument("--save_dir", type=str, default= "/scratch/s193223/oodd", help="directory for saving models")
 parser = oodd.datasets.DataModule.get_argparser(parents=[parser])
 
 args, unknown_args = parser.parse_known_args()
@@ -52,11 +52,6 @@ device = get_device()
 def setup_wandb(train_dataset_name):
     # add tags and initialize wandb run
     tags = [train_dataset_name, f"seed_{args.seed}"]
-
-    # set directory
-    if args.save_dir is None:
-        args.save_dir = "/scratch/hvae/wandb/"
-    args.save_dir = os.path.join(args.save_dir, train_dataset_name)
 
     wandb.init(project="hvae", entity="johnnysummer", dir=args.save_dir, tags=tags)
     args.save_dir = wandb.run.dir

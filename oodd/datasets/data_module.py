@@ -41,7 +41,7 @@ def get_dataset(dataset_name: str):
 class DataModule:
     """Module that serves datasets and dataloaders for training, validation and testing"""
 
-    default_batch_size = 32
+    default_batch_size = 128
     default_data_workers = 2
     default_datasets = []
 
