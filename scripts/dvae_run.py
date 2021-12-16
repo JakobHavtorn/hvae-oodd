@@ -2,6 +2,7 @@ import argparse
 import datetime
 import logging
 import os
+import time
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -76,6 +77,7 @@ def train(epoch):
     free_nats = next(free_nats_cooldown)
 
     iterator = tqdm(enumerate(datamodule.train_loader), smoothing=0.9, total=len(datamodule.train_loader), leave=False, disable=(not args.tqdm))
+    s = time.time()
     for _, (x, _) in iterator:
         x = x.to(device)
 
@@ -107,6 +109,11 @@ def train(epoch):
         }
         klds["KL(q(z|x), p(z))"] = kl_divergences
         evaluator.update("Train", "divergences", klds)
+
+    # log time
+    time_passed = time.time() - s
+    print(f"Took: {time_passed:.2f} seconds")
+    wandb.log({"training time": time_passed})
 
     evaluator.update(
         "Train", "hyperparameters", {"free_nats": [free_nats], "beta": [beta], "learning_rate": [args.learning_rate]}
