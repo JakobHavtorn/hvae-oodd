@@ -150,16 +150,16 @@ class Evaluator:
 
     def report(self, iteration: int):
         """ Report to wandb """
+        wandb.log({"iteration": iteration}) # otherwise it complains
         for source in self.sources:
             for series in self.series[source]:
                 for metric_name in self.metrics[source][series]:
                     wandb.log({
                         f"{source}_{series}_{metric_name}": self.metrics[source][series][metric_name].mean(),
-                    }, step=iteration)
-                    wandb.log({
-                        f"std_{source}_{series}_{metric_name}": self.metrics[source][series][metric_name].std(),
-                    }, step=iteration)
-                    # todo consider std
+                    })
+                    # wandb.log({
+                    #     f"std_{source}_{series}_{metric_name}": self.metrics[source][series][metric_name].std(),
+                    # }, step=iteration)
 
     def string(self, iteration: int = None, iteration_name: str = "Epoch"):
         pre = ''
