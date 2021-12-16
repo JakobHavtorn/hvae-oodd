@@ -1,6 +1,6 @@
 GPU=4
 LIKELIHOOD="DiscretizedLogisticMixLikelihoodConv2d"
-VAL_DATA="scripts/configs/val_datasets/bnw_dequantized.json"
+VAL_DATA="scripts/configs/val_datasets/32_dequantized.json"
 
 
 CUDA_VISIBLE_DEVICES=$GPU python scripts/dvae_run.py \

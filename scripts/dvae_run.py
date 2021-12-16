@@ -2,6 +2,10 @@ import argparse
 import datetime
 import logging
 import os
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
+
 import time
 
 import matplotlib.pyplot as plt
