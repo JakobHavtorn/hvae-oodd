@@ -40,7 +40,7 @@ parser.add_argument("--n_eval_samples", type=int, default=32, help="samples from
 parser.add_argument("--seed", type=int, default=1, metavar="S", help="random seed")
 parser.add_argument("--test_every", type=int, default=10, help="epochs between evaluations")
 parser.add_argument("--save_dir", type=str, default= "/scratch/s193223/oodd", help="directory for saving models")
-parser.add_argument("--tqdm", type=bool, action= "store_true", help="whether to display progressbar")
+parser.add_argument("--tqdm", action= "store_true", help="whether to display progressbar")
 parser = oodd.datasets.DataModule.get_argparser(parents=[parser])
 
 args, unknown_args = parser.parse_known_args()
