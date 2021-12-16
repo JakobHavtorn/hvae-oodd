@@ -10,3 +10,4 @@ rich
 scikit-learn
 seaborn
 tqdm
+wandb

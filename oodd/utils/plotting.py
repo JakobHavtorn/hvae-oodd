@@ -43,7 +43,7 @@ def plot_gallery(array: np.ndarray, ncols=2):
     fig, ax = plt.subplots()
     grid = gallery(array, ncols=ncols)
     ax.imshow(grid)
-    return fig, ax
+    return fig, ax, grid
     
 
 def plot_likelihood_distributions(

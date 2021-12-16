@@ -9,7 +9,7 @@ import rich
 import sklearn.metrics
 import torch
 import torch.utils.data
-
+import wandb
 from tqdm import tqdm
 
 import oodd
@@ -17,6 +17,7 @@ import oodd.models
 import oodd.datasets
 import oodd.variational
 import oodd.losses
+from oodd.datasets.data_module import parse_dataset_argument
 
 from oodd.utils import str2bool, get_device, log_sum_exp, set_seed, plot_gallery
 from oodd.evaluators import Evaluator
@@ -37,7 +38,7 @@ parser.add_argument("--free_nats", type=float, default=0, help="nats considered 
 parser.add_argument("--n_eval_samples", type=int, default=32, help="samples from prior for quality inspection")
 parser.add_argument("--seed", type=int, default=1, metavar="S", help="random seed")
 parser.add_argument("--test_every", type=int, default=1, help="epochs between evaluations")
-parser.add_argument("--save_dir", type=str, default="/scratch/s193223/oodd/models", help="directory for saving models")
+parser.add_argument("--save_dir", type=str, default=None, help="directory for saving models")
 parser = oodd.datasets.DataModule.get_argparser(parents=[parser])
 
 args, unknown_args = parser.parse_known_args()
@@ -47,6 +48,28 @@ args.sample_reduction = log_sum_exp if args.importance_weighted else torch.mean
 
 set_seed(args.seed)
 device = get_device()
+
+def setup_wandb(train_dataset_name):
+    # add tags and initialize wandb run
+    tags = [train_dataset_name, f"seed_{args.seed}"]
+
+    # set directory
+    if args.save_dir is None:
+        args.save_dir = "/scratch/hvae/wandb/"
+    args.save_dir = os.path.join(args.save_dir, train_dataset_name)
+
+    wandb.init(project="hvae", entity="johnnysummer", dir=args.save_dir, tags=tags)
+    args.save_dir = wandb.run.dir
+
+    # wandb configuration
+    run_name = "" + train_dataset_name + wandb.run.name.split("-")[-1]
+    wandb.run.name = run_name
+    wandb.config.update(args)
+    wandb.config.update({"train_dataset": train_dataset_name})
+    wandb.run.save()
+
+    # save checkpoints
+    wandb.save("*.pt")
 
 
 def train(epoch):
@@ -111,9 +134,11 @@ def test(epoch, dataloader, evaluator, dataset_name="test", max_test_examples=fl
     )  # Reshape the zeroth "sample"
     comparison = torch.cat([x[:n], p_x_mean[:n], p_x_samples[:n]])
     comparison = comparison.permute(0, 2, 3, 1)  # [B, H, W, C]
-    fig, ax = plot_gallery(comparison.cpu().numpy(), ncols=n)
+    fig, ax, img = plot_gallery(comparison.cpu().numpy(), ncols=n)
     fig.savefig(os.path.join(args.save_dir, f"reconstructions_{dataset_name}_{epoch:03}"))
     plt.close()
+    images = wandb.Image(img, caption=f"reconstructions_{dataset_name}_{epoch:03}")
+    wandb.log({f"reconstructions_{dataset_name}": images})
 
     decode_from_p_combinations = [[True] * n_p + [False] * (model.n_latents - n_p) for n_p in range(model.n_latents)]
     for decode_from_p in tqdm(decode_from_p_combinations, leave=False):
@@ -253,8 +278,9 @@ if __name__ == "__main__":
         val_datasets=args.val_datasets,
         test_datasets=args.test_datasets,
     )
-    args.save_dir = os.path.join(args.save_dir, list(datamodule.train_datasets.keys())[0] + "-" + args.start_time)
-    os.makedirs(args.save_dir, exist_ok=True)
+    train_dataset_name = list(datamodule.train_datasets.keys())[0]
+    setup_wandb(train_dataset_name)
+    # os.makedirs(args.save_dir, exist_ok=True)
 
     fh = logging.FileHandler(os.path.join(args.save_dir, "dvae.log"))
     fh.setLevel(logging.INFO)
@@ -314,9 +340,11 @@ if __name__ == "__main__":
                 p_x_mean = likelihood_data.mean.view(args.n_eval_samples, *in_shape)
                 comparison = torch.cat([p_x_samples, p_x_mean])
                 comparison = comparison.permute(0, 2, 3, 1)  # [B, H, W, C]
-                fig, ax = plot_gallery(comparison.cpu().numpy(), ncols=args.n_eval_samples // 4)
+                fig, ax, img = plot_gallery(comparison.cpu().numpy(), ncols=args.n_eval_samples // 4)
                 fig.savefig(os.path.join(args.save_dir, f"samples_{epoch:03}"))
                 plt.close()
+                images = wandb.Image(img, caption=f"samples_{epoch:03}")
+                wandb.log({"samples": images})
 
             # Test
             for name, dataloader in datamodule.val_loaders.items():

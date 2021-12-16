@@ -6,7 +6,7 @@ from typing import Dict, List, Union
 
 import numpy as np
 import torch
-
+import wandb
 
 LOGGER = logging.getLogger(name=__file__)
 
@@ -149,8 +149,17 @@ class Evaluator:
         return evaluator
 
     def report(self, iteration: int):
-        """E.g. report to some experiment framework"""
-        pass
+        """ Report to wandb """
+        for source in self.sources:
+            for series in self.series[source]:
+                for metric_name in self.metrics[source][series]:
+                    wandb.log({
+                        f"{source}_{series}_{metric_name}": self.metrics[source][series][metric_name].mean(),
+                    }, step=iteration)
+                    wandb.log({
+                        f"std_{source}_{series}_{metric_name}": self.metrics[source][series][metric_name].std(),
+                    }, step=iteration)
+                    # todo consider std
 
     def string(self, iteration: int = None, iteration_name: str = "Epoch"):
         pre = ''
