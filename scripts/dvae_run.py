@@ -113,7 +113,7 @@ def train(epoch):
     # log time
     time_passed = time.time() - s
     print(f"Took: {time_passed:.2f} seconds")
-    wandb.log({"training time": time_passed})
+    wandb.log({"training time": time_passed}, step=epoch * len(datamodule.train_loader))
 
     evaluator.update(
         "Train", "hyperparameters", {"free_nats": [free_nats], "beta": [beta], "learning_rate": [args.learning_rate]}
@@ -141,7 +141,7 @@ def test(epoch, dataloader, evaluator, dataset_name="test", max_test_examples=fl
     fig.savefig(os.path.join(args.save_dir, f"reconstructions_{dataset_name}_{epoch:03}"))
     plt.close()
     images = wandb.Image(img, caption=f"reconstructions_{dataset_name}_{epoch:03}")
-    wandb.log({f"reconstructions_{dataset_name}": images})
+    wandb.log({f"reconstructions_{dataset_name}": images}, step=epoch * len(datamodule.train_loader))
 
     decode_from_p_combinations = [[True] * n_p + [False] * (model.n_latents - n_p) for n_p in range(model.n_latents)]
     for decode_from_p in tqdm(decode_from_p_combinations, leave=False, disable=(not args.tqdm)):
@@ -348,7 +348,7 @@ if __name__ == "__main__":
                 fig.savefig(os.path.join(args.save_dir, f"samples_{epoch:03}"))
                 plt.close()
                 images = wandb.Image(img, caption=f"samples_{epoch:03}")
-                wandb.log({"samples": images})
+                wandb.log({"samples": images}, step=epoch * len(datamodule.train_loader))
 
             # Test
             for name, dataloader in datamodule.val_loaders.items():
