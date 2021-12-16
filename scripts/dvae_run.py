@@ -127,6 +127,7 @@ def test(epoch, dataloader, evaluator, dataset_name="test", max_test_examples=fl
     LOGGER.info(f"Testing: {dataset_name}")
     model.eval()
 
+    # visualize reconstructions
     x, _ = next(iter(dataloader))
     x = x.to(device)
     n = min(x.size(0), 8)
@@ -135,7 +136,15 @@ def test(epoch, dataloader, evaluator, dataset_name="test", max_test_examples=fl
     p_x_samples = likelihood_data.samples[: args.batch_size].view(
         args.batch_size, *in_shape
     )  # Reshape the zeroth "sample"
-    comparison = torch.cat([x[:n], p_x_mean[:n], p_x_samples[:n]])
+
+    decode_from_p = [True] * (model.n_latents - 1) + [False]
+    likelihood_data, stage_datas = model(x, n_posterior_samples=args.samples, decode_from_p=decode_from_p, use_mode=decode_from_p)
+    p_x_mean_top = likelihood_data.mean[: args.batch_size].view(args.batch_size, *in_shape)  # Reshape the zeroth "sample"
+    p_x_samples_top = likelihood_data.samples[: args.batch_size].view(
+        args.batch_size, *in_shape
+    )  # Reshape the zeroth "sample"
+
+    comparison = torch.cat([x[:n], p_x_mean[:n], p_x_samples[:n], p_x_mean_top[:n], p_x_samples_top[:n]])
     comparison = comparison.permute(0, 2, 3, 1)  # [B, H, W, C]
     fig, ax, img = plot_gallery(comparison.cpu().numpy(), ncols=n)
     fig.savefig(os.path.join(args.save_dir, f"reconstructions_{dataset_name}_{epoch:03}"))
@@ -143,6 +152,7 @@ def test(epoch, dataloader, evaluator, dataset_name="test", max_test_examples=fl
     images = wandb.Image(img, caption=f"reconstructions_{dataset_name}_{epoch:03}")
     wandb.log({f"reconstructions_{dataset_name}": images}, step=epoch * len(datamodule.train_loader))
 
+    # Evaluations
     decode_from_p_combinations = [[True] * n_p + [False] * (model.n_latents - n_p) for n_p in range(model.n_latents)]
     for decode_from_p in tqdm(decode_from_p_combinations, leave=False, disable=(not args.tqdm)):
         n_skipped_latents = sum(decode_from_p)

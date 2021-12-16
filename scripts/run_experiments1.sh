@@ -1,4 +1,4 @@
-GPU=0
+GPU=1
 LIKELIHOOD="BernoulliLikelihoodConv2d"
 VAL_DATA="scripts/configs/val_datasets/binarized.json"
 
@@ -17,7 +17,7 @@ CUDA_VISIBLE_DEVICES=$GPU python scripts/dvae_run.py \
                                --seed 1 \
                                --train_datasets \
                                '{
-                                   "FashionMNISTBinarized": {"dynamic": true, "split": "train"}
+                                   "notMNISTBinarized": {"split": "train"}
                                }' \
                                --val_datasets $VAL_DATA \
                                --likelihood $LIKELIHOOD \
@@ -29,7 +29,7 @@ CUDA_VISIBLE_DEVICES=$GPU python scripts/dvae_run.py \
                                --seed 1 \
                                --train_datasets \
                                '{
-                                   "MNISTBinarized": {"dynamic": true, "split": "train"}
+                                   "Omniglot28x28Binarized": {"split": "train"}
                                }' \
                                --val_datasets $VAL_DATA \
                                --likelihood $LIKELIHOOD \
@@ -41,13 +41,11 @@ CUDA_VISIBLE_DEVICES=$GPU python scripts/dvae_run.py \
                                --seed 1 \
                                --train_datasets \
                                '{
-                                   "KMNISTBinarized": {"dynamic": true, "split": "train"}
+                                   "Omniglot28x28InvertedBinarized": { "split": "train"}
                                }' \
                                --val_datasets $VAL_DATA \
                                --likelihood $LIKELIHOOD \
                                --config_deterministic scripts/configs/default_model/config_deterministic.json \
                                --config_stochastic scripts/configs/default_model/config_stochastic.json
-
-
 
 

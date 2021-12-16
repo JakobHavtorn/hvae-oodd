@@ -1,23 +1,23 @@
-GPU=0
-LIKELIHOOD="BernoulliLikelihoodConv2d"
-VAL_DATA="scripts/configs/val_datasets/binarized.json"
+GPU=2
+LIKELIHOOD="DiscretizedLogisticMixLikelihoodConv2d"
+VAL_DATA="scripts/configs/val_datasets/bnw_dequantized.json"
 
 echo "Running experiments on GPU $GPU"
 
-#         'FashionMNISTBinarized': {'split': 'validation', 'dynamic': False},
-#        'MNISTBinarized': {'split': 'validation', 'dynamic': False},
-#        'notMNISTBinarized': {'split': 'validation'},
-#        'Omniglot28x28Binarized': {'split': 'validation'},
-#        'Omniglot28x28InvertedBinarized': {'split': 'validation'},
+#         'FashionMNISTDequantized': {'split': 'validation', 'dynamic': False},
+#        'MNISTDequantized': {'split': 'validation', 'dynamic': False},
+#        'notMNISTDequantized': {'split': 'validation'},
+#        'Omniglot28x28Dequantized': {'split': 'validation'},
+#        'Omniglot28x28InvertedDequantized': {'split': 'validation'},
 # not doing small norb as it's bad binarized
-#        'SmallNORB28x28Binarized': {'split': 'validation'},
-#        'KMNISTBinarized': {'split': 'validation', 'dynamic': False}
+#        'SmallNORB28x28Dequantized': {'split': 'validation'},
+#        'KMNISTDequantized': {'split': 'validation', 'dynamic': False}
 
 CUDA_VISIBLE_DEVICES=$GPU python scripts/dvae_run.py \
                                --seed 1 \
                                --train_datasets \
                                '{
-                                   "FashionMNISTBinarized": {"dynamic": true, "split": "train"}
+                                   "FashionMNISTDequantized": {"dynamic": true, "split": "train"}
                                }' \
                                --val_datasets $VAL_DATA \
                                --likelihood $LIKELIHOOD \
@@ -29,7 +29,7 @@ CUDA_VISIBLE_DEVICES=$GPU python scripts/dvae_run.py \
                                --seed 1 \
                                --train_datasets \
                                '{
-                                   "MNISTBinarized": {"dynamic": true, "split": "train"}
+                                   "MNISTDequantized": {"dynamic": true, "split": "train"}
                                }' \
                                --val_datasets $VAL_DATA \
                                --likelihood $LIKELIHOOD \
@@ -41,7 +41,7 @@ CUDA_VISIBLE_DEVICES=$GPU python scripts/dvae_run.py \
                                --seed 1 \
                                --train_datasets \
                                '{
-                                   "KMNISTBinarized": {"dynamic": true, "split": "train"}
+                                   "KMNISTDequantized": {"dynamic": true, "split": "train"}
                                }' \
                                --val_datasets $VAL_DATA \
                                --likelihood $LIKELIHOOD \

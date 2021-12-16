@@ -4,6 +4,5 @@
    "notMNISTBinarized": {"split": "validation"},
    "Omniglot28x28Binarized": {"split": "validation"},
    "Omniglot28x28InvertedBinarized": {"split": "validation"},
-   "SmallNORB28x28Binarized": {"split": "validation"},
    "KMNISTBinarized": {"split": "validation"}
 }

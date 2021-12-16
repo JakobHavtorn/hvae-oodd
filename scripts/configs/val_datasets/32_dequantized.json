@@ -1,0 +1,5 @@
+{
+    "CIFAR10Dequantized": {"dynamic": false, "split": "validation"},
+    "CIFAR100Dequantized": {"dynamic": false, "split": "validation"},
+    "SVHNDequantized": {"dynamic": false, "split": "validation"}
+}

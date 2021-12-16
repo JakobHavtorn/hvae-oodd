@@ -1,0 +1,9 @@
+{
+   "FashionMNISTDequantized": {"split": "validation"},
+   "MNISTDequantized": {"split": "validation"},
+   "notMNISTDequantized": {"split": "validation"},
+   "Omniglot28x28Dequantized": {"split": "validation"},
+   "Omniglot28x28InvertedDequantized": {"split": "validation"},
+   "SmallNORB28x28Dequantized": {"split": "validation"},
+   "KMNISTDequantized": {"split": "validation"}
+}
