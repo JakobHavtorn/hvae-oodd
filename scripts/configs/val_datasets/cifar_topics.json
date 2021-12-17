@@ -1,0 +1,8 @@
+{
+    "CIFAR10DequantizedAnimals": {"dynamic": false, "split": "validation"},
+    "CIFAR10DequantizedTransportation": {"dynamic": false, "split": "validation"},
+    "CIFAR100DequantizedAnimals": {"dynamic": false, "split": "validation"},
+    "CIFAR100DequantizedPlants": {"dynamic": false, "split": "validation"},
+    "CIFAR100DequantizedThings": {"dynamic": false, "split": "validation"},
+    "CIFAR100DequantizedRest": {"dynamic": false, "split": "validation"}
+}

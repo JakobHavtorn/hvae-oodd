@@ -1,0 +1,6 @@
+{
+    "CIFAR10DequantizedFirstHalf": {"dynamic": false, "split": "validation"},
+    "CIFAR10DequantizedSecondHalf": {"dynamic": false, "split": "validation"},
+    "CIFAR100DequantizedFirstHalf": {"dynamic": false, "split": "validation"},
+    "CIFAR100DequantizedSecondHalf": {"dynamic": false, "split": "validation"}
+}
