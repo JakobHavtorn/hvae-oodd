@@ -176,7 +176,7 @@ with torch.no_grad():
                 likelihood_data_k, stage_datas_k = model(x, decode_from_p=decode_from_p, use_mode=decode_from_p)
                 kl_divergences_k = [
                     stage_data.loss.kl_elementwise
-                    for stage_data in stage_datas
+                    for stage_data in stage_datas_k
                     if stage_data.loss.kl_elementwise is not None
                 ]
                 loss_k, elbo_k, likelihood_k, kl_divergences_k = criterion(
