@@ -25,12 +25,22 @@ from oodd.evaluators import Evaluator
 LOGGER = logging.getLogger(name=__file__)
 
 
+try:
+    import wandb
+    wandb_available = True
+except ImportError:
+    LOGGER.warning("Running without remote tracking!")
+    wandb_available = False
+
+
 parser = argparse.ArgumentParser(description="VAE MNIST Example")
 parser.add_argument("--model", default="VAE", help="model type (vae | lvae | biva)")
 parser.add_argument("--epochs", type=int, default=1000, help="number of epochs to train")
 parser.add_argument("--learning_rate", type=float, default=3e-4, help="learning rate")
-parser.add_argument("--samples", type=int, default=1, help="samples from approximate posterior")
-parser.add_argument("--importance_weighted", type=str2bool, default=False, const=True, nargs="?", help="use iw bound")
+parser.add_argument("--train_samples", type=int, default=1, help="samples from approximate posterior")
+parser.add_argument("--test_samples", type=int, default=1, help="samples from approximate posterior")
+parser.add_argument("--train_importance_weighted", type=str2bool, default=False, const=True, nargs="?", help="use iw bound")
+parser.add_argument("--test_importance_weighted", type=str2bool, default=False, const=True, nargs="?", help="use iw bound")
 parser.add_argument("--warmup_epochs", type=int, default=0, help="epochs to warm up the KL term.")
 parser.add_argument("--free_nats_epochs", type=int, default=0, help="epochs to warm up the KL term.")
 parser.add_argument("--free_nats", type=float, default=0, help="nats considered free in the KL term")
@@ -38,12 +48,16 @@ parser.add_argument("--n_eval_samples", type=int, default=32, help="samples from
 parser.add_argument("--seed", type=int, default=1, metavar="S", help="random seed")
 parser.add_argument("--test_every", type=int, default=1, help="epochs between evaluations")
 parser.add_argument("--save_dir", type=str, default="./models", help="directory for saving models")
+parser.add_argument("--use_wandb", type=str2bool, default=True, help="use wandb tracking")
+parser.add_argument("--name", type=str, default=True, help="wandb tracking name")
 parser = oodd.datasets.DataModule.get_argparser(parents=[parser])
 
 args, unknown_args = parser.parse_known_args()
 
 args.start_time = str(datetime.datetime.now()).replace(" ", "-").replace(":", "-")
-args.sample_reduction = log_sum_exp if args.importance_weighted else torch.mean
+args.train_sample_reduction = log_sum_exp if args.train_importance_weighted else torch.mean
+args.test_sample_reduction = log_sum_exp if args.test_importance_weighted else torch.mean
+args.use_wandb = wandb_available and args.use_wandb
 
 set_seed(args.seed)
 device = get_device()
@@ -51,7 +65,7 @@ device = get_device()
 
 def train(epoch):
     model.train()
-    evaluator = Evaluator(primary_metric="log p(x)", logger=LOGGER)
+    evaluator = Evaluator(primary_metric="log p(x)", logger=LOGGER, use_wandb=args.use_wandb)
 
     beta = next(deterministic_warmup)
     free_nats = next(free_nats_cooldown)
@@ -60,17 +74,17 @@ def train(epoch):
     for _, (x, _) in iterator:
         x = x.to(device)
 
-        likelihood_data, stage_datas = model(x, n_posterior_samples=args.samples)
+        likelihood_data, stage_datas = model(x, n_posterior_samples=args.train_samples)
         kl_divergences = [
             stage_data.loss.kl_elementwise for stage_data in stage_datas if stage_data.loss.kl_elementwise is not None
         ]
         loss, elbo, likelihood, kl_divergences = criterion(
             likelihood_data.likelihood,
             kl_divergences,
-            samples=args.samples,
+            samples=args.train_samples,
             free_nats=free_nats,
             beta=beta,
-            sample_reduction=args.sample_reduction,
+            sample_reduction=args.train_sample_reduction,
             batch_reduction=None,
         )
 
@@ -104,11 +118,9 @@ def test(epoch, dataloader, evaluator, dataset_name="test", max_test_examples=fl
     x, _ = next(iter(dataloader))
     x = x.to(device)
     n = min(x.size(0), 8)
-    likelihood_data, stage_datas = model(x, n_posterior_samples=args.samples)
-    p_x_mean = likelihood_data.mean[: args.batch_size].view(args.batch_size, *in_shape)  # Reshape the zeroth "sample"
-    p_x_samples = likelihood_data.samples[: args.batch_size].view(
-        args.batch_size, *in_shape
-    )  # Reshape the zeroth "sample"
+    likelihood_data, stage_datas = model(x, n_posterior_samples=args.test_samples)
+    p_x_mean = likelihood_data.mean[: args.batch_size].view(args.batch_size, *in_shape)  # Reshape zeroth "sample"
+    p_x_samples = likelihood_data.samples[: args.batch_size].view(args.batch_size, *in_shape)  # Reshape zeroth "sample"
     comparison = torch.cat([x[:n], p_x_mean[:n], p_x_samples[:n]])
     comparison = comparison.permute(0, 2, 3, 1)  # [B, H, W, C]
     fig, ax = plot_gallery(comparison.cpu().numpy(), ncols=n)
@@ -133,7 +145,7 @@ def test(epoch, dataloader, evaluator, dataset_name="test", max_test_examples=fl
             x = x.to(device)
 
             likelihood_data, stage_datas = model(
-                x, n_posterior_samples=args.samples, decode_from_p=decode_from_p, use_mode=decode_from_p
+                x, n_posterior_samples=args.test_samples, decode_from_p=decode_from_p, use_mode=decode_from_p
             )
             kl_divergences = [
                 stage_data.loss.kl_elementwise
@@ -143,10 +155,10 @@ def test(epoch, dataloader, evaluator, dataset_name="test", max_test_examples=fl
             loss, elbo, likelihood, kl_divergences = criterion(
                 likelihood_data.likelihood,
                 kl_divergences,
-                samples=args.samples,
+                samples=args.test_samples,
                 free_nats=0,
                 beta=1,
-                sample_reduction=args.sample_reduction,
+                sample_reduction=args.test_sample_reduction,
                 batch_reduction=None,
             )
 
@@ -296,9 +308,14 @@ if __name__ == "__main__":
     LOGGER.info("DataModule:\n%s", datamodule)
     LOGGER.info("Model:\n%s", model)
 
+    if args.use_wandb:
+        wandb.init(project="hvae-oodd", config=args, name=f"{args.model} {datamodule.primary_val_name} {args.name}")
+        wandb.save("*.pt")
+        wandb.watch(model, log="all")
+
     # Run
     test_elbos = [-np.inf]
-    test_evaluator = Evaluator(primary_source=datamodule.primary_val_name, primary_metric="log p(x)", logger=LOGGER)
+    test_evaluator = Evaluator(primary_source=datamodule.primary_val_name, primary_metric="log p(x)", logger=LOGGER, use_wandb=args.use_wandb)
 
     LOGGER.info("Running training...")
     for epoch in range(1, args.epochs + 1):

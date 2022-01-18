@@ -2,6 +2,7 @@ black
 matplotlib
 numpy
 pandas
+pylint
 pytest
 pytest-cov
 pytest-html

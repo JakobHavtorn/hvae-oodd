@@ -7,8 +7,14 @@ from typing import Dict, List, Union
 import numpy as np
 import torch
 
+try:
+    import wandb
+except ImportError:
+    pass
+
 
 LOGGER = logging.getLogger(name=__file__)
+
 
 
 def dd_dict():
@@ -25,7 +31,8 @@ class Evaluator:
         primary_metric: str = None,
         primary_source: str = None,
         logger: logging.Logger = LOGGER,
-        keep_on_device: bool = True,
+        keep_on_device: bool = False,
+        use_wandb: bool = True,
     ):
         """Evaluator that accumulates several metrics in a three-level data structure while keeping tensors on device.
 
@@ -57,6 +64,7 @@ class Evaluator:
         self._primary_metric = primary_metric
         self.logger = logger
         self.keep_on_device = keep_on_device
+        self.use_wandb = use_wandb
 
         self.reset()
 
@@ -117,8 +125,7 @@ class Evaluator:
             for metric_name, values in metrics.items():
                 if not isinstance(values, torch.Tensor):
                     values = torch.Tensor(values)
-                else:
-                    values = values.detach()
+                values = values.detach()
 
                 if not self.keep_on_device:
                     values = values.to("cpu")
@@ -150,7 +157,18 @@ class Evaluator:
 
     def report(self, iteration: int):
         """E.g. report to some experiment framework"""
-        pass
+        if self.use_wandb:
+            log_dict = dict()
+            for source in self.sources:
+                s = f"{source}"
+                for series in self.series[source]:
+                    ss = s + f".{series}"
+                    for metric_name in self.metrics[source][series]:
+                        name = ss + f".{metric_name}"
+                        value = self.metrics[source][series][metric_name].mean()
+                        log_dict[name] = value
+            log_dict = {k: v.item() for k, v in log_dict.items()}
+            wandb.log(log_dict, step=iteration)
 
     def string(self, iteration: int = None, iteration_name: str = "Epoch"):
         pre = ''
