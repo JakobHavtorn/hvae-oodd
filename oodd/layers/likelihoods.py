@@ -626,7 +626,7 @@ def log_discretized_mix_logistic(x, l):
     # Get the means and adjust them based on preceding
     # sub-pixels
     x = x.contiguous()
-    x = x.unsqueeze(-1)# + torch.zeros(xs + [nr_mix], device=x.device)
+    x = x.unsqueeze(-1)
     m2 = (means[:, :, :, 1, :] + coeffs[:, :, :, 0, :] * x[:, :, :, 0, :]).view(xs[0], xs[1], xs[2], 1, nr_mix)
 
     m3 = (
