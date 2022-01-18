@@ -1,6 +1,6 @@
 # hvae-oodd
 
-<a href="https://zenodo.org/badge/latestdoi/373464051"><img src="https://zenodo.org/badge/373464051.svg" alt="DOI"></a>
+<a href="https://doi.org/10.5281/zenodo.5873322"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.5873322.svg" alt="DOI"></a>
 
 Official source code repository for the ICML 2021 paper "Hierarchical VAEs Know What They Don't Know"
 
