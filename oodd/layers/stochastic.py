@@ -185,7 +185,7 @@ class GaussianStochasticModule(StochasticModule):
         top: bool = False,
         activation: nn.Module = nn.ELU,
         learn_prior: bool = False,
-        min_scale: float = 0,
+        min_scale: float = 1e-6,
         max_scale: float = float("inf")
     ):
         super().__init__(in_shape, latent_features, top)
