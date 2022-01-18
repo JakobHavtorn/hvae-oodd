@@ -140,6 +140,12 @@ llr-ood-0e34596b-5d77fdc2
 llr-ood-0e34596b-94f41e80
 results-hvae-oodd
 
+# models directory
+models/
+
+# wandb directory
+wandb/
+
 # Pytest
 .pytest
 pytest
