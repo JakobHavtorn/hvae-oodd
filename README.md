@@ -18,7 +18,7 @@ conda deactivate
 conda env remove -n oodd -y
 conda create -y -n oodd python==3.8.10
 conda activate oodd
-conda install -y -c pytorch python pytorch==1.8.1 torchvision cudatoolkit=10.2
+conda install -y -c pytorch pytorch torchvision torchaudio cudatoolkit=11.3
 pip install -r requirements.txt
 pip install --editable .
 ```
@@ -97,7 +97,7 @@ python scripts/dvae_run.py \
 
 ```bash
 python scripts/dvae_run.py \
---epochs 1000 \
+--epochs 2000 \
 --batch_size 128 \
 --free_nats 2 \
 --free_nats_epochs 400 \
@@ -114,26 +114,26 @@ python scripts/dvae_run.py \
 --config_deterministic \
 '[
     [
-        {"block": "ResBlockConv2d", "out_channels": 32, "kernel_size": 5, "stride": 1, "weightnorm": true, "gated": false},
-        {"block": "ResBlockConv2d", "out_channels": 32, "kernel_size": 5, "stride": 1, "weightnorm": true, "gated": false},
-        {"block": "ResBlockConv2d", "out_channels": 64, "kernel_size": 5, "stride": 2, "weightnorm": true, "gated": false}
+        {"block": "ResBlockConv2d", "out_channels": 256, "kernel_size": 5, "stride": 1, "weightnorm": true, "gated": false},
+        {"block": "ResBlockConv2d", "out_channels": 256, "kernel_size": 5, "stride": 1, "weightnorm": true, "gated": false},
+        {"block": "ResBlockConv2d", "out_channels": 256, "kernel_size": 5, "stride": 2, "weightnorm": true, "gated": false}
     ],
     [
-        {"block": "ResBlockConv2d", "out_channels": 64, "kernel_size": 3, "stride": 1, "weightnorm": true, "gated": false},
-        {"block": "ResBlockConv2d", "out_channels": 64, "kernel_size": 3, "stride": 1, "weightnorm": true, "gated": false},
-        {"block": "ResBlockConv2d", "out_channels": 128, "kernel_size": 3, "stride": 2, "weightnorm": true, "gated": false}
+        {"block": "ResBlockConv2d", "out_channels": 256, "kernel_size": 3, "stride": 1, "weightnorm": true, "gated": false},
+        {"block": "ResBlockConv2d", "out_channels": 256, "kernel_size": 3, "stride": 1, "weightnorm": true, "gated": false},
+        {"block": "ResBlockConv2d", "out_channels": 256, "kernel_size": 3, "stride": 2, "weightnorm": true, "gated": false}
     ],
     [
-        {"block": "ResBlockConv2d", "out_channels": 128, "kernel_size": 3, "stride": 1, "weightnorm": true, "gated": false},
-        {"block": "ResBlockConv2d", "out_channels": 128, "kernel_size": 3, "stride": 1, "weightnorm": true, "gated": false},
+        {"block": "ResBlockConv2d", "out_channels": 256, "kernel_size": 3, "stride": 1, "weightnorm": true, "gated": false},
+        {"block": "ResBlockConv2d", "out_channels": 256, "kernel_size": 3, "stride": 1, "weightnorm": true, "gated": false},
         {"block": "ResBlockConv2d", "out_channels": 256, "kernel_size": 3, "stride": 2, "weightnorm": true, "gated": false}
     ]
 ]' \
 --config_stochastic \
 '[
-    {"block": "GaussianConv2d", "latent_features": 8, "weightnorm": true},
-    {"block": "GaussianConv2d", "latent_features": 16, "weightnorm": true},
-    {"block": "GaussianConv2d", "latent_features": 32, "weightnorm": true}
+    {"block": "GaussianConv2d", "latent_features": 128, "weightnorm": true},
+    {"block": "GaussianConv2d", "latent_features": 64, "weightnorm": true},
+    {"block": "GaussianDense", "latent_features": 32, "weightnorm": true}
 ]'
 ```
 
