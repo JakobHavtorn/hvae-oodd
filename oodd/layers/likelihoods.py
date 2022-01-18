@@ -484,8 +484,7 @@ def discretized_mix_logistic_rsample(l):
     """
 
     def to_one_hot(tensor, n):
-        one_hot = torch.zeros(tensor.size() + (n,))
-        one_hot = one_hot.to(tensor.device)
+        one_hot = torch.zeros(tensor.size() + (n,), device=tensor.device)
         one_hot.scatter_(len(tensor.size()), tensor.unsqueeze(-1), 1.0)
         return one_hot
 
@@ -502,11 +501,8 @@ def discretized_mix_logistic_rsample(l):
     l = l[:, :, :, nr_mix:].contiguous().view(xs + [nr_mix * 3])
 
     # sample mixture indicator from softmax
-    temp = torch.FloatTensor(logit_probs.size())
-    if l.is_cuda:
-        temp = temp.cuda()
-    temp.uniform_(1e-5, 1.0 - 1e-5)
-    temp = logit_probs.data - torch.log(-torch.log(temp))
+    temp = torch.empty_like(logit_probs).uniform_(1e-5, 1.0 - 1e-5)
+    temp = logit_probs.data - torch.log(-torch.log(temp))  # TODO Remove .data
     _, argmax = temp.max(dim=3)
 
     one_hot = to_one_hot(argmax, nr_mix)
@@ -517,11 +513,7 @@ def discretized_mix_logistic_rsample(l):
     coeffs = torch.sum(torch.tanh(l[:, :, :, :, 2 * nr_mix : 3 * nr_mix]) * sel, dim=4)
     # sample from logistic & clip to interval
     # we don't actually round to the nearest 8bit value when sampling
-    u = torch.FloatTensor(means.size())
-    if l.is_cuda:
-        u = u.cuda()
-    u.uniform_(1e-5, 1.0 - 1e-5)
-    u = nn.Parameter(u)
+    u = torch.empty_like(means).uniform_(1e-5, 1.0 - 1e-5)
     x = means + torch.exp(log_scales) * (torch.log(u) - torch.log(1.0 - u))
     x0 = torch.clamp(torch.clamp(x[:, :, :, 0], min=-1.0), max=1.0)
     x1 = torch.clamp(torch.clamp(x[:, :, :, 1] + coeffs[:, :, :, 0] * x0, min=-1.0), max=1.0)
@@ -634,8 +626,7 @@ def log_discretized_mix_logistic(x, l):
     # Get the means and adjust them based on preceding
     # sub-pixels
     x = x.contiguous()
-    x = x.unsqueeze(-1) + torch.zeros(xs + [nr_mix]).to(x.device)
-    # x = x.unsqueeze(-1) + nn.Parameter(torch.zeros(xs + [nr_mix]).to(x.device), requires_grad=False)
+    x = x.unsqueeze(-1)# + torch.zeros(xs + [nr_mix], device=x.device)
     m2 = (means[:, :, :, 1, :] + coeffs[:, :, :, 0, :] * x[:, :, :, 0, :]).view(xs[0], xs[1], xs[2], 1, nr_mix)
 
     m3 = (
